@@ -1,0 +1,23 @@
+---
+- name: 'Live API test | converge'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Live API test | converge | apply r_pufky.srv.github'
+      when: github_live_api_enable
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.github'
+      vars:
+        github_repo_archive_type: 'tar.gz'
+        github_repo_release_owner: 'roundcube'
+        github_repo_release_repo: 'roundcubemail'
+        github_repo_release: 'latest'
+        github_file_owner: 'root'
+        github_file_group: 'root'
+        github_extract_dest: '/opt/roundcube'
+        github_extract_extra_opts: '--strip-components=1'
+        github_extract_mode: 'a-st,o-rwx'
+        github_extract_remove_files:
+          - 'README.md'
+          - 'UPGRADING'
+          - 'config/config.inc.php.sample'

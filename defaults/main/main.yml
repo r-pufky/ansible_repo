@@ -1,0 +1,52 @@
+---
+# yamllint disable rule:line-length
+###############################################################################
+# Repo Release Download Manager Role Configuration
+###############################################################################
+# Determines specified version (or 'latest') from a repository then:
+# * downloads
+# * checksum validation (optional)
+# * signature validation (optional)
+# * extracts (optional)
+# * stage release in a given location.
+#
+# Will NOT re-download if a cached version exists and will NOT be re-extracted
+# if the extracted directory already exists; unless repo_force_overwrite is
+# set.
+#
+# Authenticated API requests are HIGHLY recommended to prevent 403 usage
+# denials.
+
+# Staging area for downloaded releases.
+#
+# Stage downloads to this location. Location will be created using repo_user,
+# rep_group, with 0755 permissions if it does not exist.
+#
+# Default: '/tmp'.
+repo_staging_dir: '/tmp'
+
+# Clean staged files after finished? Default: True.
+repo_staging_clean: true
+
+# Force overwrite?
+#
+# By default items will NOT be re-downloaded if a cached version exists and
+# will not be re-extracted if the extracted directory already exists.
+#
+# Default: False.
+repo_force_overwrite: false
+
+# Retry download number of times before failing. Default: 5.
+repo_download_retries: 5
+
+###############################################################################
+# Local File Permissions
+###############################################################################
+# Downloaded and extracted file user permissions. User must be managed
+# externally.
+
+# Local files owner. Default: 'root'.
+repo_file_owner: 'root'
+
+# Local files group. Default: 'root'.
+repo_file_group: 'root'

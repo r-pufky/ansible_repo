@@ -1,0 +1,32 @@
+---
+# yamllint disable rule:line-length
+###############################################################################
+# Repo Release Download Manager Testing
+###############################################################################
+# Options exposed specifically for unit testing dependent roles without
+# hammering repo API's. These are not needed in normal operation.
+
+# Enable testing.
+#
+# This will disable API use and instead return testing values for requested
+# versions as well as a locally sourced archive to extract in place of
+# downloading the file from the repo endpoint.
+#
+# TODO(role): determine if GPG validation should be enforced.
+#
+# molecule test -s live_api_test -- -v -e 'repo_testing_enable=true,repo_host_access_token={TOKEN}'
+#
+# Default: False.
+repo_testing_enable: false
+
+# Release versions simulated to return.
+#
+# repo_testing_versions:
+#     list of dict - Simulated multiple repo calls in a play.
+#   - version: str - Requested version.
+#     package: str - Path to controller file to return.
+#     checksum: str - Path to controller checksum to return.
+#     signature: str - Path to controller signature file to return.
+#
+# Default: [].
+repo_testing_versions: []

@@ -1,0 +1,36 @@
+---
+# yamllint disable rule:line-length
+###############################################################################
+# Migrate Repo Files
+###############################################################################
+# Migrate files and handle case of brand new installation. Ignore non-existing
+# source files, preserving ownership and file permissions.
+#
+# Directories are recursively migrated using cp instead of ansible.builtin.copy
+# as the task does not scale to hundreds+ files.
+#
+# Args:
+#   item: str - Remote file path to migrate.
+#   _repo_dir: str - Local versioned extract location.
+
+- name: 'Extract | migrate | check {{ item }}'
+  ansible.builtin.stat:
+    path: '{{ _repo_extract_symlink_target }}/{{ item }}'
+  register: _repo_migrate_file
+
+- name: 'Extract | migrate | migrate {{ item }}'  # noqa risky-file-permissions keep original
+  when: >
+    _repo_migrate_file.stat.exists and
+    not _repo_migrate_file.stat.isdir
+  ansible.builtin.copy:
+    remote_src: true
+    src: '{{ _repo_extract_symlink_target }}/{{ item }}'
+    dest: '{{ _repo_dir }}/{{ item }}'
+    force: true
+
+- name: 'Extract | migrate | directory'
+  when: >
+    _repo_migrate_file.stat.exists and
+    _repo_migrate_file.stat.isdir
+  ansible.builtin.command: 'cp -an "{{ _repo_extract_symlink_target }}/{{ item }}" {{ _repo_dir }}/{{ item }}'
+  changed_when: false

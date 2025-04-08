@@ -1,0 +1,63 @@
+---
+# yamllint disable rule:line-length
+# Confirm:
+# * releases are installed and migrated to the new version
+# * migrated files are kept to v1.0.0
+dependency:
+  name: 'galaxy'
+driver:
+  name: 'podman'
+provisioner:
+  name: 'ansible'
+  config_options:
+    defaults:
+      interpreter_python: 'auto_silent'
+      callback_whitelist: 'profile_tasks, timer, yaml'
+    ssh_connection:
+      pipelining: false
+  inventory:
+    group_vars:
+      all:
+        repo_testing_enable: true
+        repo_testing_versions:
+          - version: 'v1.0.0'
+            package: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz'
+          - version: 'v1.0.1'
+            package: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.1.tar.gz'
+          - version: 'v1.0.1'
+            package: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.1.tar.gz'
+platforms:
+  - name: 'repo-debian-12-extract_delete_migration'
+    image: 'ghcr.io/hifis-net/debian-systemd:12'
+    systemd: 'always'
+    volumes:
+      - '/sys/fs/cgroup:/sys/fs/cgroup:ro'
+    command: '/lib/systemd/systemd'
+    pre_build_image: true
+  - name: 'repo-debian-12-extract_delete_migration-no-keep'
+    image: 'ghcr.io/hifis-net/debian-systemd:12'
+    systemd: 'always'
+    volumes:
+      - '/sys/fs/cgroup:/sys/fs/cgroup:ro'
+    command: '/lib/systemd/systemd'
+    pre_build_image: true
+verifier:
+  name: 'ansible'
+lint: |
+  set -e
+  yamllint .
+  ansible-lint .
+scenario:
+  test_sequence:
+    # - 'dependency'
+    # - 'cleanup'
+    - 'destroy'
+    - 'syntax'
+    - 'create'
+    - 'prepare'
+    - 'converge'
+    # - 'idempotence'  # Files created, extracted, created, deleted.
+    # - 'side_effect'
+    - 'verify'
+    # - 'cleanup'
+    - 'destroy'

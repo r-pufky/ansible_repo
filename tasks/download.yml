@@ -1,0 +1,61 @@
+---
+# yamllint disable rule:line-length
+###############################################################################
+# Repo Download
+###############################################################################
+# Download and validate archive release package from repo, using specified
+# version.
+#
+# Args:
+#   _repo_archive: str - Local versioned archive location.
+#   _repo_archive_stat: stat - For existing archive location.
+#   _repo_cache_test_index: int - Current injected test archive item.
+#   _repo_staging_stat: stat - For existing staging location.
+#   _repo_staging_dir: str - Sanitized repo_staging_dir.
+#   _repo_target: str - Full version (vx.x.x) to install.
+#   _repo_target_url: str - Download url for target release.
+
+- name: 'Download | create staging directory'
+  when: not _repo_staging_stat.stat.exists
+  ansible.builtin.file:
+    path: '{{ _repo_staging_dir }}'
+    owner: '{{ repo_file_owner }}'
+    group: '{{ repo_file_group }}'
+    mode: '0755'
+    state: 'directory'
+
+- name: 'Download | {{ repo_release_repo }} {{ _repo_target }}'  # noqa name[template] show full repo version
+  when: >
+    not _repo_archive_stat.stat.exists and
+    not (repo_testing_enable | default(false))
+  ansible.builtin.get_url:
+    url: '{{ _repo_target_url }}'
+    dest: '{{ _repo_archive }}'
+    owner: '{{ repo_file_owner }}'
+    group: '{{ repo_file_group }}'
+    mode: '{{ repo_extract_mode }}'
+    headers:
+      Authorization: '{{ repo_host_access_token | default(omit) }}'
+  register: _repo_download
+  until: _repo_download is succeeded
+  retries: '{{ repo_download_retries }}'
+  delay: 2
+
+- name: 'Download'
+  when: (repo_testing_enable | default(false))
+  block:
+    - name: 'Download | inject downloaded archive'
+      when: repo_testing_versions | length > 0
+      ansible.posix.synchronize:
+        src: '{{ repo_testing_versions[_repo_cache_test_index | int].package }}'
+        dest: '{{ _repo_archive }}'
+        archive: false
+        checksum: true
+
+    - name: 'Download | inject archive permissions'
+      ansible.builtin.file:
+        path: '{{ _repo_archive }}'
+        owner: '{{ repo_file_owner }}'
+        group: '{{ repo_file_group }}'
+        mode: '{{ repo_extract_mode }}'
+        state: 'file'

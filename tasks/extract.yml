@@ -1,0 +1,93 @@
+---
+# yamllint disable rule:line-length
+###############################################################################
+# Unpack Github Archive
+###############################################################################
+# Create versioned directory and unpack 'complete' archive.
+#
+# Args:
+#   _repo_archive: str - local versioned archive location.
+#   _repo_dir: str - local versioned extract location.
+#   _repo_extract_stat: stat - for existing extract location.
+#   _repo_target: str - Full version (vx.x.x) to install.
+
+- name: 'Extract | create extract directory'
+  when: not _repo_extract_stat.stat.exists
+  ansible.builtin.file:
+    path: '{{ _repo_dir }}'
+    owner: '{{ repo_file_owner }}'
+    group: '{{ repo_file_group }}'
+    mode: '{{ repo_extract_mode }}'
+    state: 'directory'
+
+- name: 'Extract | unpack archive'
+  when: not _repo_extract_stat.stat.exists
+  ansible.builtin.unarchive:
+    src: '{{ _repo_archive }}'
+    remote_src: true
+    dest: '{{ _repo_dir }}'
+    owner: '{{ repo_file_owner | default("root", true) }}'
+    group: '{{ repo_file_group | default("root", true) }}'
+    mode: '{{ repo_extract_mode | default("0644", true) }}'
+    extra_opts: '{{ repo_extract_extra_opts | default(omit, true) }}'
+
+- name: 'Extract | cleanup non-required archive source files'
+  when: >
+    not _repo_extract_stat.stat.exists and
+    repo_extract_remove_files | length > 0
+  ansible.builtin.file:
+    path: '{{ _repo_dir }}/{{ item }}'
+    state: 'absent'
+  loop: '{{ repo_extract_remove_files }}'
+
+- name: 'Extract | check for existing symlink'
+  ansible.builtin.stat:
+    path: '{{ _repo_extract_symlink_target }}'
+  check_mode: true
+  register: _repo_symlink_stat
+
+# Migrate files before removing symlink to old version.
+- name: 'Extract | migrate'
+  when: >
+    _repo_symlink_stat.stat.exists and
+    repo_extract_migrate_files | length > 0
+  ansible.builtin.include_tasks: 'migrate.yml'
+  loop: '{{ repo_extract_migrate_files }}'
+
+- name: 'Extract | symlink {{ _repo_dir }} to {{ _repo_extract_symlink_target }}'  # noqa name[template] provide full symlink info
+  when: _repo_extract_symlink_target
+  ansible.builtin.file:
+    src: '{{ _repo_dir }}'
+    dest: '{{ _repo_extract_symlink_target }}'
+    owner: '{{ repo_file_owner }}'
+    group: '{{ repo_file_group }}'
+    force: true
+    state: 'link'
+
+- name: 'Extract | remove old versions'
+  when: repo_extract_delete_old_versions
+  block:
+    - name: 'Extract | find existing extracted archives'
+      ansible.builtin.find:
+        paths: '{{ _repo_extract_dir }}'
+        file_type: 'directory'
+        use_regex: true
+        patterns:
+          - '.*{{ repo_release_repo }}-.*'
+        recurse: false
+      register: _repo_install_stat
+
+    - name: 'Extract | delete old versions'
+      when: _repo_target != item.path | basename | regex_replace(repo_release_repo ~ '-', '')
+      ansible.builtin.file:
+        path: '{{ item.path }}'
+        state: 'absent'
+      loop: '{{ _repo_install_stat.files }}'
+      loop_control:
+        label: '{{ item.path }}'
+
+- name: 'Extract | cleanup staging archive'
+  when: repo_staging_clean
+  ansible.builtin.file:
+    path: '{{ _repo_archive }}'
+    state: 'absent'

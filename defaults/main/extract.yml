@@ -1,0 +1,110 @@
+---
+# yamllint disable rule:line-length
+###############################################################################
+# Archive Extraction Options
+###############################################################################
+# Archives options are only used if the downloaded file is an archive.
+#
+# Options per ansible.builtin.unarchive.
+#
+# Reference:
+# * https://docs.ansible.com/ansible/latest/collections/ansible/builtin/unarchive_module.html
+
+# Enable archive extraction?
+#
+# Some release artifacts are pure binary executables.
+#
+# Default: True.
+repo_extract_enable: true  # TODO(role): do we need this?
+
+# Extracted archive directory base.
+#
+# Archive will be extracted to this location in a sub directory with the format
+# {{ repo_extract_dir }}/{REPO}-{VERSION}.
+#
+# Location will be created using repo_user, repo_file_group, and repo_extract_mode
+# if non-existing.
+#
+# repo_release_repo: 'myrepo'
+# repo_release_tag: 'latest'
+# repo_extract_dir: '/opt/myrepo'
+#
+# Results (if latest version is v1.0.0): /opt/myrepo/myrepo-v1.0.0
+#
+# Default: '/tmp'.
+repo_extract_dir: '/tmp'
+
+# Extra options to apply to un-archiving tool.
+#
+# Most archives extract archive name as base directory; stripping the first
+# component will extract directly into destination.
+#
+# Default: '--strip-components=1'.
+repo_extract_extra_opts: '--strip-components=1'
+
+# Apply permissions to extracted files.
+#
+# Explicitly set extraction mode to avoid CVE-2020-1736.
+#
+# Default: 'a-st,o-rwx' (remove setuid, setgid, others).
+#
+# Reference:
+# * https://nvd.nist.gov/vuln/detail/CVE-2020-1736
+repo_extract_mode: 'a-st,o-rwx'
+
+# List of extracted files to remove. Default: [] (none).
+repo_extract_remove_files: []
+
+# Migrate listed files to newly installed release.
+#
+# Requires repo_extract_symlink_target set.
+#
+# After extraction and repo_extract_remove_files are removed, migrate files
+# from old version to the new version; preserving ownership and permissions.
+#
+# Special Case:
+#   * Explicitly list files from the release root, no globbing.
+#   * Files are not migrated if it is a brand new installation.
+#   * Files that do not exist will not cause errors.
+#   * Directories are migrated recursively.
+#
+# repo_extract_migrate_files:
+#   - 'config.db'  # v1.2/config.db -> v1.3/config.db
+#   - 'settings/alt/config.yaml'  # v1.2/settings/alt/config.yaml -> v1.3/settings/alt/config.yaml
+#   - 'data_directory'  # v1.2/data_directory/ -> v1.3/data_directory/
+#
+# Default: [] (no migration).
+repo_extract_migrate_files: []
+
+# Create a symlink to versioned extracted archive?
+#
+# Symlink will be FORCE created, linking the extracted versioned archive to the
+# specified location. Target root directory must exist.
+#
+# repo_release_repo: 'myrepo'
+# repo_release_tag: 'latest'
+# repo_extract_dir: '/opt/myrepo'
+# repo_extract_symlink_target: '/opt/myrepo/myrepo'
+#
+# Results (if latest version is v1.0.0):
+#
+#   /opt/myrepo/myrepo -> /opt/myrepo/myrepo-v1.0.0
+#
+# Equivalent to: ln -s -f /opt/myrepo/myrepo-v1.0.0 /opt/myrepo/myrepo
+#
+# Special Case:
+#   '': Disable symlink creation (default).
+#
+# Default: '' (disabled).
+repo_extract_symlink_target: ''
+
+# Delete old extracted archive versions?
+#
+# Existing directories in repo_extract_dir will be deleted if they do not
+# match the current specified version. Only directories matching
+# repo_release_repo will be considered for deletion.
+#
+# DATA DESTRUCTIVE. Ensure user data is stored somewhere else.
+#
+# Default: False.
+repo_extract_delete_old_versions: false

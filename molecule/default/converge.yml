@@ -1,0 +1,93 @@
+---
+# yamllint disable rule:line-length
+# Role variable returned variables are scoped to the current play only (e.g.
+# converge.yml) and must be tested between each application of the role. Test
+# these values while converging versus verify.yml (where scoping will prevent)
+# testing these values.
+#
+# Roles consuming this role do not need to test this way.
+- name: 'Default | converge'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Default | converge | apply r_pufky.srv.repo (tar.gz)'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.repo'
+      vars:
+        repo_release_type: 'tar.gz'
+        repo_release_owner: 'leetreleaser'
+        repo_release_repo: 'test_repo'
+        repo_release_tag: 'latest'
+        repo_file_owner: 'root'
+        repo_file_group: 'root'
+        repo_extract_dir: '/opt/test_repo_gz'
+        repo_extract_extra_opts: '--strip-components=1'
+        repo_extract_mode: 'a-st,o-rwx'
+        repo_extract_remove_files:
+          - 'README.md'
+          - '.hidden_file'
+
+    - name: 'Default | converge | assert correct tar.gz returned variables'
+      ansible.builtin.assert:
+        that:
+          - _repo_target == 'v1.0.0'
+          - _repo_target_url == 'http://example.com/tar'
+          - _repo_archive == '/tmp/test_repo-v1.0.0.tar.gz'
+          - _repo_dir == '/opt/test_repo_gz/test_repo-v1.0.0'
+          - _repo_remote_metadata is mapping
+
+    - name: 'Default | converge | apply r_pufky.srv.repo (tar.xz)'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.repo'
+      vars:
+        repo_release_type: 'tar.xz'
+        repo_release_owner: 'leetreleaser'
+        repo_release_repo: 'test_repo'
+        repo_release_tag: 'latest'
+        repo_file_owner: 'root'
+        repo_file_group: 'root'
+        repo_extract_dir: '/opt/test_repo_xz'
+        repo_extract_extra_opts: '--strip-components=1'
+        repo_extract_mode: 'a-st,o-rwx'
+        repo_extract_remove_files:
+          - 'README.md'
+          - '.hidden_file'
+
+    - name: 'Default | converge | assert correct tar.xz returned variables'
+      ansible.builtin.assert:
+        that:
+          - _repo_target == 'v1.0.0'
+          - _repo_target_url == 'http://example.com/tar'
+          - _repo_archive == '/tmp/test_repo-v1.0.0.tar.xz'
+          - _repo_dir == '/opt/test_repo_xz/test_repo-v1.0.0'
+          - _repo_remote_metadata is mapping
+
+    - name: 'Default | converge | apply r_pufky.srv.repo (zip)'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.repo'
+      vars:
+        repo_staging_clean: false
+        repo_release_type: 'zip'
+        repo_release_owner: 'leetreleaser'
+        repo_release_repo: 'test_repo'
+        repo_release_tag: 'latest'
+        repo_file_owner: 'root'
+        repo_file_group: 'root'
+        repo_extract_dir: '/opt/test_repo_zip'
+        repo_extract_symlink_target: '/opt/test_repo_zip/test_repo'  # should not affect test
+        repo_extract_extra_opts: ''
+        repo_extract_mode: 'a-st,o-rwx'
+        repo_extract_remove_files:
+          - 'README.md'
+          - '.hidden_file'
+
+    - name: 'Default | converge | assert correct zip returned variables'
+      ansible.builtin.assert:
+        that:
+          - _repo_target == 'v1.0.0'
+          - _repo_target_url == 'http://example.com/zip'
+          - _repo_archive == '/tmp/test_repo-v1.0.0.zip'
+          - _repo_dir == '/opt/test_repo_zip/test_repo-v1.0.0'
+          - _repo_remote_metadata is mapping
+
+# TODO(role): add .xz test.

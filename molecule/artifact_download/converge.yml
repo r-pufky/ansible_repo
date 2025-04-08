@@ -1,0 +1,145 @@
+---
+# yamllint disable rule:line-length
+# Role variable returned variables are scoped to the current play only (e.g.
+# converge.yml) and must be tested between each application of the role. Test
+# these values while converging versus verify.yml (where scoping will prevent)
+# testing these values.
+#
+# Roles consuming this role do not need to test this way.
+- name: 'Artifact download | converge | binary, specifier'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Artifact download | converge | binary, specifier | URL | apply r_pufky.srv.repo'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.repo'
+      vars:
+        repo_release_specifier: 'v'
+        repo_artifact_url: '{VERSION}/Binary.{BARE_VERSION}.x86-64.tar.gz'
+        repo_release_artifacts_enable: true
+        repo_release_owner: 'leetreleaser'
+        repo_release_repo: 'test_repo'
+        repo_release_tag: 'latest'
+        repo_extract_dir: '/opt/test_repo_gz'
+
+    # TODO(role): this saves as a .binary, not tar.gz. Is this what should happen?
+    #     originally would be a archive to extract.
+
+    - name: 'Artifact download | converge | binary, specifier | URL | assert parameters'
+      ansible.builtin.assert:
+        that:
+          - _repo_target == 'v1.0.0'
+          - _repo_target_url == 'https://github.com/leetreleaser/test_repo/releases/download/v1.0.0/Binary.1.0.0.x86-64.tar.gz'
+          - _repo_archive == '/tmp/test_repo-v1.0.0.tar.gz'
+          - _repo_dir == '/opt/test_repo_gz/test_repo-v1.0.0'
+          - _repo_remote_metadata is mapping
+
+    - name: 'Artifact download | converge | binary, specifier | partial URL | apply r_pufky.srv.repo'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.repo'
+      vars:
+        repo_release_specifier: 'v'
+        repo_artifact_url: '{VERSION}/Binary.x86-64.tar.gz'
+        repo_release_artifacts_enable: true
+        repo_release_owner: 'leetreleaser'
+        repo_release_repo: 'test_repo'
+        repo_release_tag: 'latest'
+        repo_extract_dir: '/opt/test_repo_gz_partial'
+
+    - name: 'Artifact download | converge | binary, specifier | partial URL | assert parameters'
+      ansible.builtin.assert:
+        that:
+          - _repo_target == 'v1.0.0'
+          - _repo_target_url == 'https://github.com/leetreleaser/test_repo/releases/download/v1.0.0/Binary.x86-64.tar.gz'
+          - _repo_archive == '/tmp/test_repo-v1.0.0.tar.gz'
+          - _repo_dir == '/opt/test_repo_gz_partial/test_repo-v1.0.0'
+          - _repo_remote_metadata is mapping
+
+    - name: 'Artifact download | converge | binary, specifier | no URL | EXPECTED FAILURE'
+      block:
+        - name: 'Artifact download | converge | binary, specifier | no URL | EXPECTED FAILURE | apply r_pufky.srv.repo'
+          ansible.builtin.include_role:
+            name: 'r_pufky.srv.repo'
+          vars:
+            repo_release_specifier: 'v'
+            repo_release_artifacts_enable: true
+            repo_release_owner: 'leetreleaser'
+            repo_release_repo: 'test_repo'
+            repo_release_tag: 'latest'
+            repo_extract_dir: '/opt/test_repo_gz_fail'
+          register: _test_failure
+      rescue:
+        - name: 'Artifact download | converge | binary, specifier | no URL | EXPECTED FAILURE | assert failure'
+          ansible.builtin.assert:
+            that:
+              - not _test_failure.changed
+            fail_msg: >
+              repo_artifact_enable without repo_artifact_url should FAIL.
+
+- name: 'Artifact download | converge | binary, no specifier | URL'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Artifact download | converge | binary, no specifier | URL | apply r_pufky.srv.repo'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.repo'
+      vars:
+        repo_artifact_url: '{VERSION}/Binary.{BARE_VERSION}.x86-64.tar.gz'
+        repo_release_artifacts_enable: true
+        repo_release_owner: 'leetreleaser'
+        repo_release_repo: 'test_repo'
+        repo_release_tag: 'latest'
+        repo_extract_dir: '/opt/test_repo_gz'
+
+    - name: 'Artifact download | converge | binary, no specifier | URL | assert parameters'
+      ansible.builtin.assert:
+        that:
+          - _repo_target == 'v1.0.0'
+          - _repo_target_url == 'https://github.com/leetreleaser/test_repo/releases/download/v1.0.0/Binary.v1.0.0.x86-64.tar.gz'
+          - _repo_archive == '/tmp/test_repo-v1.0.0.tar.gz'
+          - _repo_dir == '/opt/test_repo_gz/test_repo-v1.0.0'
+          - _repo_remote_metadata is mapping
+
+    - name: 'Artifact download | converge | binary, specifier | partial URL | apply r_pufky.srv.repo'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.repo'
+      vars:
+        repo_release_specifier: 'v'
+        repo_artifact_url: '{VERSION}/Binary.x86-64.tar.gz'
+        repo_release_artifacts_enable: true
+        repo_release_owner: 'leetreleaser'
+        repo_release_repo: 'test_repo'
+        repo_release_tag: 'latest'
+        repo_extract_dir: '/opt/test_repo_gz_partial'
+
+    - name: 'Artifact download | converge | binary, specifier | partial URL | assert parameters'
+      ansible.builtin.assert:
+        that:
+          - _repo_target == 'v1.0.0'
+          - _repo_target_url == 'https://github.com/leetreleaser/test_repo/releases/download/v1.0.0/Binary.x86-64.tar.gz'
+          - _repo_archive == '/tmp/test_repo-v1.0.0.tar.gz'
+          - _repo_dir == '/opt/test_repo_gz_partial/test_repo-v1.0.0'
+          - _repo_remote_metadata is mapping
+
+    # Static URLs should override binary options without issue.
+    - name: 'Artifact download | converge | binary | static URL | apply r_pufky.srv.repo'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.repo'
+      vars:
+        repo_release_specifier: 'v'
+        repo_artifact_url: '{VERSION}/Binary.x86-64.tar.gz'
+        repo_artifact_static_url: 'https://example.com/alt/repo/binary.tar.gz'
+        repo_release_artifacts_enable: true
+        repo_release_owner: 'leetreleaser'
+        repo_release_repo: 'test_repo'
+        repo_release_tag: 'latest'
+        repo_extract_dir: '/opt/test_static'
+
+    - name: 'Artifact download | converge | binary, specifier | partial URL | assert parameters'
+      ansible.builtin.assert:
+        that:
+          - _repo_target == 'v1.0.0'
+          - _repo_target_url == 'http://example.com/tar'  # Test injects.
+          - _repo_archive == '/tmp/test_repo-v1.0.0.tar.gz'
+          - _repo_dir == '/opt/test_static/test_repo-v1.0.0'
+          - _repo_remote_metadata is mapping

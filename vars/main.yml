@@ -1,0 +1,50 @@
+---
+###############################################################################
+# Github REST API
+###############################################################################
+# TODO(sync): Keep features in sync with ansible_codeberg.
+#
+# Reference:
+# * https://docs.github.com/en/rest/about-the-rest-api/api-versions
+# * https://codeberg.org/api/swagger
+
+# Last time github options were validated against a default configuration.
+repo_role_validate_date: '2024-06-22'
+repo_role_validate_release: 'bookworm'
+
+# Role checked against this version of the API.
+repo_role_github_api_version: '2022-11-28'
+repo_role_codeberg_api_version: 'v1'
+
+###############################################################################
+# Host API Endpoints
+###############################################################################
+# API endpoint to query for release information. Additional endpoints may be
+# used if they match github interface.
+#
+# Reference:
+# * https://docs.github.com/en/rest?api
+# * https://codeberg.org/api/swagger
+
+repo_role_host:
+  github:
+    api: 'https://api.github.com/repos'
+    base: 'https://github.com'
+  codeberg:
+    api: 'https://codeberg.org/api/v1/repos'
+    base: 'https://codeberg.org'
+
+###############################################################################
+# APT Packages
+###############################################################################
+
+repo_role_packages:
+  - 'ca-certificates'  # SSL support for ansible.builtin.get_url.
+  - 'unzip'  # zip archives.
+  - 'xz-utils'  # xz archives.
+
+repo_role_gpg_packages:
+  - 'gnupg2'
+
+repo_role_testing_packages:
+  - 'rsync'  # ansible.posix.synchronize (testing local archive copy).

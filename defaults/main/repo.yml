@@ -1,0 +1,233 @@
+---
+# yamllint disable rule:line-length
+###############################################################################
+# Remote Host
+###############################################################################
+# Configures remote repository host to download release from.
+
+# Repository host to use.
+#
+# Values:
+#   github: Use github repositories.
+#   codeberg: Use codeberg repositories.
+#
+# Default: 'github'.
+repo_host: 'github'
+
+# Access token.
+#
+# Unauthenticated (anonymous) API requests are heavily restricted and will
+# cause this role to fail with 403's if used frequently.
+#
+# Github:
+#   Classic Tokens:
+#   * settings > developer settings > personal access tokens (classic)
+#     * notes: {LABEL APPROPRIATELY}
+#     * expiration: {CUSTOM}
+#     * scopes: NONE
+#
+#   Fine-grained Tokens:
+#   * settings > developer settings > personal access tokens (fine-grained)
+#     * token name: {LABEL APPROPRIATELY}
+#     * expiration: {CUSTOM}
+#     * description: {DESCRIPTIVE TEXT}
+#     * resource owner: {YOUR ACCOUNT}
+#     * repository access: Public Repositories (read-only)
+#
+#   Reference:
+#   * https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic
+#
+# Codeberg:
+#   * settings > applications > access tokens
+#     * name: {LABEL APPROPRIATELY}
+#     * Repository and Organization Access: Public only
+#     * Select Permissions: repository (read-only)
+#
+#   Reference:
+#   * https://docs.codeberg.org/advanced/access-token
+#
+# Special Case:
+#   '': Anonymous (rated limited).
+#
+# Default: '' (anonymous).
+repo_host_access_token: ''
+
+###############################################################################
+# Release Options
+###############################################################################
+
+# Repository owner. Default: ''.
+repo_release_owner: ''
+
+# Repository name. Default: ''.
+repo_release_repo: ''
+
+# Repository release tag.
+#
+# Special Case:
+#      latest: Determines the latest release based on creation time from
+#              releases tag list. Will not work for repositories which do not
+#              have simple release tagging:
+#                * Multiple branches (stable, LTS, unstable, etc).
+#                * Non-deterministic release patterns.
+#   {VERSION}: Explicit version to install.
+#
+# Default: 'latest'.
+repo_release_tag: 'latest'
+
+# Release version specifier.
+#
+# Prepended text to a tag name delineating version:
+# * repo_release_tag: 'v1.2.3'
+# * repo_release_specifier: 'v'
+# * version: '1.2.3'
+#
+# Special Case:
+#   latest: Version detect is used if repo_release_tag=latest.
+#
+# Default: '' (no specifier).
+repo_release_specifier: ''
+
+# Enable pre-releases when searching for latest?
+#
+# Include all releases when searching for latest, not just tagged releases.
+#
+# Default: False.
+repo_release_pre_enable: false
+
+# Enable release artifacts?
+#
+# Release artifacts are added after a release is cut. These are typically built
+# or pre-packaged executables alongside of the source code release and are not
+# included in the default release metadata. These artifacts require the use of
+# repo_artifact_* to download.
+#
+# Certain repositories contain both a source and a artifact release, or
+# platform specific releases. Enabling artifacts allows selecting one of these
+# releases to download instead (and disables automatic selection of source
+# download).
+#
+# An example of this is Radarr, which the release is source and the actual
+# release is a build artifact based on platform. For this repository you would
+# enable artifacts and use repo_artifact_* to download the correct version.
+#
+# Reference:
+# * https://github.com/Radarr/Radarr/releases/latest
+repo_release_artifacts_enable: false
+
+# Release type.
+#
+# Requires repo_release_artifacts_enable=false.
+#
+# Target file to download from the release.
+#
+# Values:
+#    tar.*: Download tarball release.
+#       xz: Download tarball release.
+#      zip: Download zipball release.
+#
+# Default: 'tar.gz'.
+repo_release_type: 'tar.gz'
+
+# Release checksum validation.
+#
+# Enabling checksum validation will result in fatal errors if checksum fails.
+#
+# Values:
+#    {EXT}: Checksum extension (appended to download file). Fits most use
+#           cases where the checksum is appended to the filename being checked.
+#           e.g. 'sha256': release-1.0.0.tar.gz -> release-1.0.0.tar.gz.sha256.
+#   {FILE}: Full checksum filename, downloaded from repo_release_tag location.
+#           Enables handling checksums with non-standard filename use.
+#           e.g. release-1.0.0.tar.gz -> checksum-for-1.0.0.sha256.
+#       '': Disable checksum validation (default).
+#
+# Default: '' (disabled).
+repo_release_checksum: ''
+
+# Release GPG signature validation.
+#
+# Requires repo_release_gpg_key_id or repo_release_gpg_key.
+#
+# Enabling GPG signature validation will result in fatal errors if signature
+# fails.
+#
+# Values:
+#    {EXT}: Signature extension (appended to download file). Fits most use
+#           cases where the signature is appended to the filename being
+#           checked.
+#           e.g. 'asc': release-1.0.0.tar.gz -> release-1.0.0.tar.gz.asc.
+#   {FILE}: Full signatures filename, downloaded from repo_release_tag
+#           location. Enables handling signatures with non-standard filename
+#           use. e.g. release-1.0.0.tar.gz -> signature-for-1.0.0.asc.
+#       '': Disable checksum validation (default).
+#
+# Default: '' (disabled).
+repo_release_signature: ''
+
+# Repo GPG Key ID.
+#
+# Required packages are installed and downloads are automatically validated
+# against the published key with the specified ID.
+#
+# Default: '' (disabled).
+#
+# Reference:
+# * https://keys.openpgp.org/search
+repo_release_gpg_key_id: ''
+
+# Repo GPG Key.
+#
+# Required packages are installed and downloads are automatically validated
+# against the provided key.
+#
+# Default: '' (disabled).
+repo_release_gpg_key: ''
+
+###############################################################################
+# Artifact Options
+###############################################################################
+# Requires repo_release_artifacts_enable=true.
+
+# Artifact release URL template.
+#
+# Use URL path after repository download URI.
+#
+# Special Case:
+#        {VERSION}: version detected or set with repo_release_tag (v1.2.3).
+#   {BARE_VERSION}: version detected or set with repo_release_specifier
+#                   removed. If specifier is not found, {VERSION} is used.
+#                   (1.2.3).
+#
+# repo_release_owner: 'myuser'
+# repo_release_repo: 'myrepo'
+# repo_release_tag: 'latest'  # (v5.18.4.9674)
+# repo_artifact_url: '{VERSION}/Artifact.{BARE_VERSION}.x86-64.tar.gz'
+#
+# Results in the following URL:
+# {{ repo_host }}/myuser/myrepo/releases/download/v5.18.4.9674/Artifact.5.18.4.9674.x86-64.tar.gz'
+#
+# Default: ''.
+repo_artifact_url: ''
+
+# Artifact release static URL.
+#
+# WARNING HERE BE DRAGONS.
+# > If you are using this, the repo owner is NOT using source control
+# > correctly. Strongly consider why you need to specify a URL outside of
+# > public repositories to download a release (e.g. malicious code injection,
+# > etc).
+#
+# Complete URL to an archive resource. For repositories that only release
+# source code, but have an alternative URL for pre-built artifacts which are
+# not hosted on the same domain. All other processing applies as normal.
+#
+# Special Case:
+#   *: ALWAYS generates warning messages as this can be extremely dangerous.
+#   *: Only use if there are no other options.
+#   *: Overrides repo_artifact_url if both are set. Version will always be set
+#      to URL access date, ISO-8601 (Y-m-d). Potentially this means installing
+#      a new version every day the role is run.
+#
+# Default: ''.
+repo_artifact_static_url: ''

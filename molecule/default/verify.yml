@@ -1,0 +1,26 @@
+---
+- name: 'Default | verify | extraction successful'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Default | verify | test extraction'
+      ansible.builtin.include_tasks: 'tests/test_extraction.yml'
+      loop:
+        - type: 'tar.gz'
+          path: '/opt/test_repo_gz/test_repo-v1.0.0'
+          opts: true
+          archive: '/tmp/test_repo-v1.0.0.tar.gz'
+          clean: true
+          symlink: ''
+        - type: 'tar.xz'
+          path: '/opt/test_repo_xz/test_repo-v1.0.0'
+          opts: true
+          archive: '/tmp/test_repo-v1.0.0.tar.xz'
+          clean: true
+          symlink: ''
+        - type: 'zip'
+          path: '/opt/test_repo_zip/test_repo-v1.0.0'
+          opts: false
+          archive: '/tmp/test_repo-v1.0.0.zip'
+          clean: false
+          symlink: '/opt/test_repo_zip/test_repo'
