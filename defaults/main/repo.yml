@@ -8,7 +8,7 @@
 # Repository host to use.
 #
 # Values:
-#   github: Use github repositories.
+#     github: Use github repositories (default).
 #   codeberg: Use codeberg repositories.
 #
 # Default: 'github'.
@@ -70,7 +70,7 @@ repo_release_repo: ''
 #              have simple release tagging:
 #                * Multiple branches (stable, LTS, unstable, etc).
 #                * Non-deterministic release patterns.
-#   {VERSION}: Explicit version to install.
+#   {VERSION}: Explicit version tag to install.
 #
 # Default: 'latest'.
 repo_release_tag: 'latest'
@@ -83,115 +83,22 @@ repo_release_tag: 'latest'
 # * version: '1.2.3'
 #
 # Special Case:
-#   latest: Version detect is used if repo_release_tag=latest.
+#   latest: Version detected is used if repo_release_tag=latest.
 #
 # Default: '' (no specifier).
 repo_release_specifier: ''
 
 # Enable pre-releases when searching for latest?
 #
-# Include all releases when searching for latest, not just tagged releases.
+# Include all releases when searching for latest (drafts, pre-releases).
 #
 # Default: False.
 repo_release_pre_enable: false
 
-# Enable release artifacts?
+# Asset template.
 #
-# Release artifacts are added after a release is cut. These are typically built
-# or pre-packaged executables alongside of the source code release and are not
-# included in the default release metadata. These artifacts require the use of
-# repo_artifact_* to download.
-#
-# Certain repositories contain both a source and a artifact release, or
-# platform specific releases. Enabling artifacts allows selecting one of these
-# releases to download instead (and disables automatic selection of source
-# download).
-#
-# An example of this is Radarr, which the release is source and the actual
-# release is a build artifact based on platform. For this repository you would
-# enable artifacts and use repo_artifact_* to download the correct version.
-#
-# Reference:
-# * https://github.com/Radarr/Radarr/releases/latest
-repo_release_artifacts_enable: false
-
-# Release type.
-#
-# Requires repo_release_artifacts_enable=false.
-#
-# Target file to download from the release.
-#
-# Values:
-#    tar.*: Download tarball release.
-#       xz: Download tarball release.
-#      zip: Download zipball release.
-#
-# Default: 'tar.gz'.
-repo_release_type: 'tar.gz'
-
-# Release checksum validation.
-#
-# Enabling checksum validation will result in fatal errors if checksum fails.
-#
-# Values:
-#    {EXT}: Checksum extension (appended to download file). Fits most use
-#           cases where the checksum is appended to the filename being checked.
-#           e.g. 'sha256': release-1.0.0.tar.gz -> release-1.0.0.tar.gz.sha256.
-#   {FILE}: Full checksum filename, downloaded from repo_release_tag location.
-#           Enables handling checksums with non-standard filename use.
-#           e.g. release-1.0.0.tar.gz -> checksum-for-1.0.0.sha256.
-#       '': Disable checksum validation (default).
-#
-# Default: '' (disabled).
-repo_release_checksum: ''
-
-# Release GPG signature validation.
-#
-# Requires repo_release_gpg_key_id or repo_release_gpg_key.
-#
-# Enabling GPG signature validation will result in fatal errors if signature
-# fails.
-#
-# Values:
-#    {EXT}: Signature extension (appended to download file). Fits most use
-#           cases where the signature is appended to the filename being
-#           checked.
-#           e.g. 'asc': release-1.0.0.tar.gz -> release-1.0.0.tar.gz.asc.
-#   {FILE}: Full signatures filename, downloaded from repo_release_tag
-#           location. Enables handling signatures with non-standard filename
-#           use. e.g. release-1.0.0.tar.gz -> signature-for-1.0.0.asc.
-#       '': Disable checksum validation (default).
-#
-# Default: '' (disabled).
-repo_release_signature: ''
-
-# Repo GPG Key ID.
-#
-# Required packages are installed and downloads are automatically validated
-# against the published key with the specified ID.
-#
-# Default: '' (disabled).
-#
-# Reference:
-# * https://keys.openpgp.org/search
-repo_release_gpg_key_id: ''
-
-# Repo GPG Key.
-#
-# Required packages are installed and downloads are automatically validated
-# against the provided key.
-#
-# Default: '' (disabled).
-repo_release_gpg_key: ''
-
-###############################################################################
-# Artifact Options
-###############################################################################
-# Requires repo_release_artifacts_enable=true.
-
-# Artifact release URL template.
-#
-# Use URL path after repository download URI.
+# Naming template to identify the correct asset to download. Generally this is
+# the filename from the release assets.
 #
 # Special Case:
 #        {VERSION}: version detected or set with repo_release_tag (v1.2.3).
@@ -202,32 +109,113 @@ repo_release_gpg_key: ''
 # repo_release_owner: 'myuser'
 # repo_release_repo: 'myrepo'
 # repo_release_tag: 'latest'  # (v5.18.4.9674)
-# repo_artifact_url: '{VERSION}/Artifact.{BARE_VERSION}.x86-64.tar.gz'
+# repo_release_asset: 'Asset.{BARE_VERSION}.x86-64.tar.gz'
 #
-# Results in the following URL:
-# {{ repo_host }}/myuser/myrepo/releases/download/v5.18.4.9674/Artifact.5.18.4.9674.x86-64.tar.gz'
+# Results in: Asset.5.18.4.9674.x86-64.tar.gz'
 #
 # Default: ''.
-repo_artifact_url: ''
+repo_release_asset: ''
 
-# Artifact release static URL.
+# Release checksum validation.
+#
+# Enabling checksum validation will result in fatal errors if checksum fails.
+#
+# Special Case:
+#        {VERSION}: version detected or set with repo_release_tag (v1.2.3).
+#   {BARE_VERSION}: version detected or set with repo_release_specifier
+#                   removed. If specifier is not found, {VERSION} is used.
+#                   (1.2.3).
+# Values:
+#   '': Disable checksum validation (default).
+#
+# repo_release_owner: 'myuser'
+# repo_release_repo: 'myrepo'
+# repo_release_tag: 'latest'  # (v5.18.4.9674)
+# repo_release_checksum: 'Asset.{BARE_VERSION}.x86-64.tar.gz.sha256'
+#
+# Results in: Asset.5.18.4.9674.x86-64.tar.gz.sha256'
+#
+# Default: '' (disabled).
+repo_release_checksum: ''
+
+# Release GPG signature validation.
+#
+# Requires repo_release_gpg_key_id or repo_release_gpg_key.
+#
+# Enabling GPG signature validation will result in fatal errors if signature
+# fails. repo_release_gpg_key_id preferred.
+#
+# Special Case:
+#        {VERSION}: version detected or set with repo_release_tag (v1.2.3).
+#   {BARE_VERSION}: version detected or set with repo_release_specifier
+#                   removed. If specifier is not found, {VERSION} is used.
+#                   (1.2.3).
+# Values:
+#   '': Disable checksum validation (default).
+#
+# repo_release_owner: 'myuser'
+# repo_release_repo: 'myrepo'
+# repo_release_tag: 'latest'  # (v5.18.4.9674)
+# repo_release_signature: 'Asset.{BARE_VERSION}.x86-64.tar.gz.asc'
+#
+# Results in: Asset.5.18.4.9674.x86-64.tar.gz.asc'
+#
+# Default: '' (disabled).
+repo_release_signature: ''
+
+# GPG keyserver. Default: 'hkps://keys.openpgp.org'.
+repo_gpg_key_server: 'hkps://keys.openpgp.org'
+
+# Repo GPG Key ID.
+#
+# Requires repo_gpg_key_server.
+#
+# Required packages are installed and downloads are automatically validated
+# against the published signature with the key with the specified ID.
+#
+# Default: '' (disabled).
+#
+# Reference:
+# * https://keys.openpgp.org/search
+repo_release_gpg_key_id: ''
+
+# Repo GPG Key.
+#
+# Sourced from ansible controller; automatically placed in repo_staging_clean
+# imported and validated against the published signature. Required packages are
+# automatically installed.
+#
+# repo_release_gpg_key: 'host_vars/repo.example.com/data/gpg_signing_key.asc'
+#
+# Default: '' (disabled).
+repo_release_gpg_key: ''
+
+# Asset release static URL.
+#
+# Requires:
+#   * repo_release_asset set WITHOUT templated values.
+#   * repo_release_asset_checksum=''.
+#   * repo_release_asset_signature=''.
 #
 # WARNING HERE BE DRAGONS.
 # > If you are using this, the repo owner is NOT using source control
 # > correctly. Strongly consider why you need to specify a URL outside of
-# > public repositories to download a release (e.g. malicious code injection,
-# > etc).
+# > public TRUSTED repositories to download a release (e.g. malicious code
+# > injection, etc).
 #
 # Complete URL to an archive resource. For repositories that only release
-# source code, but have an alternative URL for pre-built artifacts which are
+# source code, but have an alternative URL for pre-built assets which are
 # not hosted on the same domain. All other processing applies as normal.
 #
 # Special Case:
 #   *: ALWAYS generates warning messages as this can be extremely dangerous.
-#   *: Only use if there are no other options.
-#   *: Overrides repo_artifact_url if both are set. Version will always be set
-#      to URL access date, ISO-8601 (Y-m-d). Potentially this means installing
-#      a new version every day the role is run.
+#   *: Version will always be set to URL access date, ISO-8601 (Y-m-d).
+#      Potentially this means installing a new version every day the role is
+#      run.
+#   *: No validation of downloaded binary is done (checksum, signature).
+#      This is done to prevent the false sense of security from untrusted sites
+#      that provide checksums and signatures.
+#   *: ONLY use if there are no other options.
 #
 # Default: ''.
-repo_artifact_static_url: ''
+repo_release_asset_static_url: ''

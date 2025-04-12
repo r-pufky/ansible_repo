@@ -1,16 +1,21 @@
 ---
 # yamllint disable rule:line-length
-# Integration test against a live github repository for download and
-# extraction. This confirms the API endpoints are processed correctly and
-# should only be run as one-off test before releasing.
+# Integration test against a live repository for download and extraction. This
+# confirms the API endpoints are processed correctly and should only be run as
+# one-off test before releasing.
 #
-# Set github_live_api_enable: true to test live API commands.
+# Enable live API commands.
 #
-#   molecule test -s live_api_test -- -v -e 'github_live_api_enable=true'
+#   molecule test -s live_api_test -- -v -e 'repo_live_api_github_enable=true'
 #
-# Additionally, a github token may be provided to test authenticated API use:
+# Additionally, a token may be provided to test authenticated API use:
 #
-#   molecule test -s live_api_test -- -v -e 'github_live_api_enable=true,github_personal_access_token={TOKEN}'
+#   molecule test -s live_api_test -- -v -e 'repo_live_api_github_enable=true repo_host_access_token={TOKEN}'
+#
+# Test for each supported repository host:
+#
+#   repo_live_api_github_enable
+#   repo_live_api_codeberg_enable
 dependency:
   name: 'galaxy'
 driver:
@@ -26,10 +31,10 @@ provisioner:
   inventory:
     group_vars:
       all:
-        github_testing_enable: false
-        github_live_api_enable: false
+        repo_testing_enable: false
+        repo_live_api_enable: false
 platforms:
-  - name: 'github-12-live_api_test'
+  - name: 'repo-12-live_api_test'
     image: 'ghcr.io/hifis-net/debian-systemd:12'
     systemd: 'always'
     volumes:

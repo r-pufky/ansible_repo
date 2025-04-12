@@ -3,206 +3,155 @@
 ###############################################################################
 # Repo Prep
 ###############################################################################
-# Prep environment for release download management.
+# Prep environment for release download management. Access tokens must have
+# 'contents:read' permissions.
 #
-# API Endpoints:
-# * {{ _repo_host_api }}/{USER}/{REPO}/releases/latest
-# * {{ _repo_host_api }}/{USER}/{REPO}/releases/tags/{VERSION}
-# Access tokens must have 'contents:read' permissions.
-#
-# Install Methodology:
-# * If testing, extract sourced testing archive, set variables and exit.
-# * Determine version or 'latest' version to use.
-# * Install dependencies for downloading.
-# * Download to staging directory.
-# * Extract archive to target location.
-# * Set target permissions.
-# * Cleanup staged file if enabled.
+# Methodology:
+# * Generate query URL based on testing, static URL, or standard release.
+# * Query URL if API or static; standardize results.
+# * Inject testing data if enabled.
+# * Parse metadata for asset values.
+# * Cleanup existing files if existing.
+# * Set changed flag.
 #
 # Generates:
-#   _repo_archive_stat: stat - For existing archive location.
-#   _repo_artifact_url: str - Sanitized repo_artifact_url.
-#   _repo_base_url: str - API base URL.
-#   _repo_cache_test_index: int - Current injected test archive item.
-#   _repo_extract_dir: str - Sanitized repo_extract_dir.
-#   _repo_extract_stat: stat - For existing extract location.
-#   _repo_extract_symlink_target: str - Sanitized repo_extract_symlink_target.
-#   _repo_host_api: str - Sanitized repo_host_api.
-#   _repo_host_base: str - Sanitized repo_host_base.
-# ----  _repo_release_checksum: str - Sanitized repo_release_checksum.
-#   _repo_release_path: str - API path.
-# ----   _repo_release_signature: str - Sanitized repo_release_signature.
-#   _repo_release_type: str - Sanitized repo_release_type.
-#   _repo_staging_stat: stat - For existing staging location.
-#   _repo_staging_dir: str - Sanitized repo_staging_dir.
+#   __repo_auth_header: str - API token auth header.
+#   __repo_release_url: str - API 'releases' URL path.
+#   __repo_host_base: str - API base URL.
+#   __repo_staging_dir: str - Staging location for downloads, extracts.
+#   __repo_release_path: str - API 'tags' URL path.
+#   __repo_extract_dir: str - Extract location for downloads, extracts.
+#   __repo_asset_stat: stat - asset location.
+#   __repo_checksum_stat: stat - checksum location (when defined).
+#   __repo_signature_stat: stat - signature location (when defined).
+#   __repo_staging_stat: stat - for existing staging location.
+#   __repo_extract_stat: stat - for existing extract location.
 #
 # Exports:
-#   _repo_archive: str - Local versioned archive location.
-#   _repo_changed: bool - True if new archive extracted/installed.
-#   _repo_dir: str - Local versioned target location.
+#   _repo_asset: dict - Asset metadata.
+#   _repo_changed: bool - True if new asset extracted/installed.
+#   _repo_checksum: dict - Checksum metadata.
+#   _repo_signature: dict - Signature metadata.
 #   _repo_remote_metadata: dict - Release metadata for requested version.
-#   _repo_target: str - Full version (vx.x.x) to install.
-#   _repo_target_url: str - Download url for target release.
-#   _role_checksum: str - Checksum used to verify release.
-#   _repo_signature: str - Signature used to verify release.
+#   _repo_dir: str - Versioned repository extract location.
+#   _repo_tag: str - Detected tag version.
 #
 # Reference:
 # * https://docs.github.com/en/rest/releases
 
-- name: 'Prep | repo_release_owner and repo_release_repo required'
-  ansible.builtin.assert:
-    quiet: true
-    that:
-      - repo_release_owner | length > 0 and repo_release_repo | length > 0
-    fail_msg: |
-      repo_release_owner and repo_release_repo must be set.
-
-      repo_release_owner: {{ repo_release_owner }}
-      repo_release_repo: {{ repo_release_repo }}
-
-- name: 'Prep | GPG requires key or key ID'
-  when: repo_release_signature | length > 0
-  ansible.builtin.assert:
-    quiet: true
-    that:
-      - repo_release_gpg_key_id | length > 0 or repo_release_gpg_key | length > 0
-    fail_msg: |
-      repo_release_signature requires key or key ID set.
-
-      repo_release_gpg_key_id: {{ repo_release_gpg_key_id }}
-      repo_release_gpg_key: {{ repo_release_gpg_key }}
-
-- name: 'Prep | artifacts require URL or static URL'
-  when: repo_release_artifacts_enable
-  ansible.builtin.assert:
-    quiet: true
-    that:
-      - repo_artifact_url | length > 0 or repo_artifact_static_url | length > 0
-    fail_msg: |
-      repo_release_artifacts_enable requires repo_artifact_url or repo_artifact_static_url set.
-
-      repo_artifact_url: {{ repo_artifact_url }}
-      repo_artifact_static_url: {{ repo_artifact_static_url }}
-
-- name: 'Prep | WARNING'
-  when: repo_host_access_token | length == 0
-  ansible.builtin.debug:
-    msg: |
-      No API token specified (repo_host_access_token).
-
-      Downloads may fail due to rate limited anonymous API usage.
-
-- name: 'Prep | WARNING'
-  when: repo_artifact_static_url | length > 0
-  ansible.builtin.debug:
-    msg: |
-      WARNING: DOWNLOAD CANNOT BE VERIFIED.
-
-      Static URLs should ONLY be used for repositories without versioning which
-      release compiled binaries from a separate URL. These downloads can
-      contain malicious code and should be UNTRUSTED by default.
-
-      {{ repo_artifact_static_url }}
-
-- name: 'Prep | WARNING'
-  when: repo_extract_delete_old_versions
-  ansible.builtin.debug:
-    msg: |
-      Delete old extracted archive versions enabled.
-
-      Existing directories in {{ repo_extract_dir }} will be deleted if they do
-      not match the current specified version. Only directories matching
-      {{ repo_release_repo }} will be considered for deletion.
-
-      DATA DESTRUCTIVE.
-
 - name: 'Prep | sanitize paths'
   ansible.builtin.set_fact:
-    _repo_host_api: '{{ repo_role_host[repo_host | default("github") | lower].api }}'
-    _repo_host_base: '{{ repo_role_host[repo_host | default("github") | lower].base }}'
-    _repo_staging_dir: "{{ repo_staging_dir | regex_replace('\\/$', '') }}"
-    _repo_extract_dir: "{{ repo_extract_dir | regex_replace('\\/$', '') }}"
-    _repo_extract_symlink_target: "{{ repo_extract_symlink_target | regex_replace('\\/$', '') }}"
-    _repo_release_type: "{{ repo_release_type | regex_replace('^\\.', '') }}"
-    _repo_release_checksum: "{{ repo_release_checksum | regex_replace('^\\.', '') }}"
-    _repo_release_signature: "{{ repo_release_signature | regex_replace('^\\.', '') }}"
-    _repo_artifact_url: "{{ repo_artifact_url | regex_replace('^\\/', '') }}"
+    __repo_release_url: '{{ repo_role_host[repo_host | default("github") | lower].api }}/{{ repo_release_owner }}/{{ repo_release_repo }}/releases'
+    __repo_host_base: '{{ repo_role_host[repo_host | default("github") | lower].base }}'
+    __repo_staging_dir: "{{ repo_staging_dir | regex_replace('\\/$', '') }}"
+    __repo_release_path: '/{{ "tags/" if repo_release_tag != "latest" }}{{ repo_release_tag }}'
+    __repo_extract_dir: "{{ repo_extract_dir | regex_replace('\\/$', '') }}"
 
-- name: 'Prep | build release queries'
-  ansible.builtin.set_fact:
-    _repo_base_url: '{{ _repo_host_api }}/{{ repo_release_owner }}/{{ repo_release_repo }}/releases'
-    _repo_release_path: '/{{ "tags/" if repo_release_tag != "latest" }}{{ repo_release_tag }}'
-
-- name: 'Prep | get release metadata'
+# Variables used in header keys do not resolve correctly. Register will
+# overwrite variable with conditional results (e.g. github query success then
+# codeberg skipped, register overwrites the query results). Instead, just send
+# both authentication headers.
+- name: 'Prep | query release metadata'
   when: >
     not (repo_testing_enable | default(false)) and
-    repo_artifact_static_url | length == 0
+    repo_release_asset_static_url | length == 0
   ansible.builtin.uri:
-    url: '{{ _repo_base_url }}{{ "" if repo_release_pre_enable else _repo_release_path }}'
+    url: '{{ __repo_release_url }}{{ "" if repo_release_pre_enable else __repo_release_path }}'
     return_content: true
     headers:
-      Authorization: '{{ repo_host_access_token | default(omit) }}'
+      'Authorization': '{{ repo_host_access_token | default(omit) }}'
+      'AuthorizationHeaderToken': '{{ repo_host_access_token | default(omit) }}'
   register: _repo_remote_metadata
 
-# Set before testing for injection. Normal artifact URL generates own metadata.
-- name: 'Prep | static URL download'
-  when: repo_artifact_static_url | length > 0
+- name: 'Prep | sanitize release metadata'
+  when: not (repo_testing_enable | default(false))
   ansible.builtin.set_fact:
-    _repo_remote_metadata: {"json": {"tag_name": "{{ now(utc=true, fmt='%Y-%m-%d') }}", "tarball_url": "{{ repo_artifact_static_url }}", "zipball_url": "{{ repo_artifact_static_url }}"}}
+    _repo_remote_metadata: '{{ _repo_remote_metadata.json[0] if repo_release_pre_enable else _repo_remote_metadata.json }}'
 
+- name: 'Prep | get static release metadata'
+  when: repo_release_asset_static_url | length > 0
+  ansible.builtin.set_fact:
+    _repo_remote_metadata: {
+      "tag_name": "{{ now(utc=true, fmt='%Y-%m-%d') }}",
+      "assets": [
+        {
+          "name": "{{ repo_release_asset }}",
+          "browser_download_url": "{{ repo_release_asset_static_url }}",
+        }
+      ]
+    }
+
+# Inject response data to _repo_remote_metadata for testing.
 - name: 'Prep | testing'
   when: (repo_testing_enable | default(false))
   block:
     - name: 'Prep | testing | cache data'
       ansible.builtin.set_fact:
-        _repo_cache_test_index: '{{ 0 if not _repo_cache_test_index is defined else _repo_cache_test_index | int + 1 }}'
+        __repo_cache_test_index: '{{ 0 if not __repo_cache_test_index is defined else __repo_cache_test_index | int + 1 }}'
 
-    - name: 'Prep | testing | inject get release metadata'
+    - name: 'Prep | testing | parse testing metadata'
       ansible.builtin.set_fact:
-        _repo_remote_metadata: '{{
-          {"json": {"tag_name": "{{ repo_testing_versions[_repo_cache_test_index | int].version }}", "tarball_url": "http://example.com/tar", "zipball_url": "http://example.com/zip"}}
-          if not repo_release_pre_enable else
-          {"json": [{"tag_name": "{{ repo_testing_versions[_repo_cache_test_index | int].version }}", "tarball_url": "http://example.com/pre_tar", "zipball_url": "http://example.com/pre_zip"}]}
-          }}'
+        __repo_cache_asset: '{{ repo_testing_versions[__repo_cache_test_index | int].asset | basename }}'
+        __repo_cache_checksum: '{{ repo_testing_versions[__repo_cache_test_index | int].checksum | default("") | basename }}'
+        __repo_cache_signature: '{{ repo_testing_versions[__repo_cache_test_index | int].signature | default("") | basename }}'
 
-- name: 'Prep | sanitize release metadata'
+    - name: 'Prep | testing | inject metadata'
+      ansible.builtin.set_fact:
+        _repo_remote_metadata: {
+          "tag_name": "{{ repo_testing_versions[__repo_cache_test_index | int].version }}",
+          "assets": [
+            {
+              "name": "{{ __repo_cache_asset }}",
+              "browser_download_url": "http://example.com/test",
+            },
+            {
+              "name": "{{ __repo_cache_checksum if repo_release_checksum | length > 0 else __repo_cache_asset ~ '.sha256' }}",
+              "browser_download_url": "http://example.com/test.sha256",
+            },
+            {
+              "name": "{{ __repo_cache_signature if repo_release_signature | length > 0 else __repo_cache_asset ~ '.asc' }}",
+              "browser_download_url": "http://example.com/test.asc",
+            },
+          ]
+        }
+
+- name: 'Prep | parse release tags'
   ansible.builtin.set_fact:
-    _repo_json: '{{ _repo_remote_metadata.json[0] if repo_release_pre_enable else _repo_remote_metadata.json }}'
+    _repo_tag: '{{ _repo_remote_metadata.tag_name }}'
+    __repo_tag_bare: '{{ _repo_remote_metadata.tag_name if repo_release_specifier == "" else _repo_remote_metadata.tag_name.split(repo_release_specifier)[1:] | join(repo_release_specifier) }}'
+    __repo_asset_dict: '{{ dict(_repo_remote_metadata.assets | map(attribute="name") | zip(_repo_remote_metadata.assets)) }}'
 
-- name: 'Prep | parse release metadata'
+- name: 'Prep | parse templates'
   ansible.builtin.set_fact:
-    _repo_target: '{{ _repo_json.tag_name }}'
-    _repo_target_url: '{{ _repo_json.zipball_url if _repo_release_type.startswith("zip") else _repo_json.tarball_url }}'
+    __repo_release_asset: '{{ repo_release_asset | regex_replace("{VERSION}", _repo_tag) | regex_replace("{BARE_VERSION}", __repo_tag_bare) }}'
+    __repo_release_checksum: '{{ repo_release_checksum | regex_replace("{VERSION}", _repo_tag) | regex_replace("{BARE_VERSION}", __repo_tag_bare) }}'
+    __repo_release_signature: '{{ repo_release_signature | regex_replace("{VERSION}", _repo_tag) | regex_replace("{BARE_VERSION}", __repo_tag_bare) }}'
+    _repo_dir: '{{ __repo_extract_dir }}/{{ repo_release_repo }}-{{ _repo_tag }}'
 
-- name: 'Prep | binary download'
-  when: repo_release_artifacts_enable and repo_artifact_static_url | length == 0
-  block:
-    - name: 'Prep | binary download | split version on specifier'
-      ansible.builtin.set_fact:
-        _repo_target_bare: '{{ _repo_target if repo_release_specifier == "" else _repo_target.split(repo_release_specifier)[1:] | join(repo_release_specifier) }}'
-
-    - name: 'Prep | binary download | parse binary path'
-      ansible.builtin.set_fact:
-        _repo_artifact_path: '{{ _repo_artifact_url | regex_replace("{VERSION}", _repo_target) | regex_replace("{BARE_VERSION}", _repo_target_bare) }}'
-
-    - name: 'Prep | binary download | set target URL'
-      ansible.builtin.set_fact:
-        _repo_target_url: '{{ _repo_host_base }}/{{ repo_release_owner }}/{{ repo_release_repo }}/releases/download/{{ _repo_artifact_path | default(_repo_target_url) }}'
-
-- name: 'Prep | generate locations'
+- name: 'Prep | parse asset metadata'
   ansible.builtin.set_fact:
-    # TODO(role): for naked binaries, this will error (url/my.exe)
-    _repo_archive: '{{ _repo_staging_dir }}/{{ repo_release_repo }}-{{ _repo_target }}.{{ _repo_release_type }}'
-    _role_checksum: '{{ repo_release_checksum if "." not in repo_release_checksum else repo_release_repo ~ "-" ~ _repo_target ~ "." ~ _repo_release_type ~ "." ~ repo_release_checksum }}'
-    _repo_signature: '{{ repo_release_signature if "." not in repo_release_signature else repo_release_repo ~ "-" ~ _repo_target ~ "." ~ _repo_release_type ~ "." ~ repo_release_signature }}'
-    _repo_dir: '{{ repo_extract_dir }}/{{ repo_release_repo }}-{{ _repo_target }}'
+    _repo_asset: '{{ __repo_asset_dict[__repo_release_asset] }}'
+    _repo_checksum: '{{  __repo_asset_dict[__repo_release_checksum] | default({}) }}'
+    _repo_signature: '{{ __repo_asset_dict[__repo_release_signature] | default({}) }}'
 
 - name: 'Prep | force overwrite enabled'
   when: repo_force_overwrite
   block:
-    - name: 'Prep | remove cached download'
+    - name: 'Prep | remove cached asset'
       ansible.builtin.file:
-        path: '{{ _repo_archive }}'
+        path: '{{ __repo_staging_dir }}/{{ _repo_asset.name }}'
+        state: 'absent'
+
+    - name: 'Prep | remove cached checksum'
+      when: _repo_checksum | length > 0
+      ansible.builtin.file:
+        path: '{{ __repo_staging_dir }}/{{ _repo_checksum.name }}'
+        state: 'absent'
+
+    - name: 'Prep | remove cached signature'
+      when: _repo_signature | length > 0
+      ansible.builtin.file:
+        path: '{{ __repo_staging_dir }}/{{ _repo_signature.name }}'
         state: 'absent'
 
     - name: 'Prep | remove cached release'
@@ -210,21 +159,35 @@
         path: '{{ _repo_dir }}'
         state: 'absent'
 
-- name: 'Prep | check archive location'
+- name: 'Prep | check asset location'
   ansible.builtin.stat:
-    path: '{{ _repo_archive }}'
-  register: _repo_archive_stat
+    path: '{{ __repo_staging_dir }}/{{ _repo_asset.name }}'
+  register: __repo_asset_stat
+
+# If not set, use an invalid location for existence checks.
+- name: 'Prep | check checksum location'
+  when: _repo_checksum | length > 0
+  ansible.builtin.stat:
+    path: '{{ __repo_staging_dir }}/{{ _repo_checksum.name }}'
+  register: __repo_checksum_stat
+
+# If not set, use an invalid location for existence checks.
+- name: 'Prep | check signature location'
+  when: _repo_signature | length > 0
+  ansible.builtin.stat:
+    path: '{{ __repo_staging_dir }}/{{ _repo_signature.name }}'
+  register: __repo_signature_stat
 
 - name: 'Prep | check staging directory'
   ansible.builtin.stat:
-    path: '{{ _repo_staging_dir }}'
-  register: _repo_staging_stat
+    path: '{{ __repo_staging_dir }}'
+  register: __repo_staging_stat
 
 - name: 'Prep | check extract directory'
   ansible.builtin.stat:
     path: '{{ _repo_dir }}'
-  register: _repo_extract_stat
+  register: __repo_extract_stat
 
 - name: 'Prep | set change state'
   ansible.builtin.set_fact:
-    _repo_changed: '{{ not _repo_extract_stat.stat.exists }}'
+    _repo_changed: '{{ not __repo_extract_stat.stat.exists }}'

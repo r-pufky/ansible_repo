@@ -1,0 +1,133 @@
+---
+# yamllint disable rule:line-length
+###############################################################################
+# Stage Github Assets
+###############################################################################
+# Download assets if required; validate checksums and signatures.
+#
+# Args:
+#   __repo_asset_stat: stat - asset location.
+#   __repo_checksum_stat: stat - checksum location (when defined).
+#   __repo_signature_stat: stat - signature location (when defined).
+#   __repo_staging_dir: str - Staging location for downloads, extracts.
+#   __repo_staging_stat: stat - for existing staging location.
+#   _repo_asset: dict - asset metadata.
+#   _repo_checksum: dict - checksum metadata.
+#   _repo_signature: dict - signature metadata.
+
+- name: 'Stage | create staging directory'
+  when: not __repo_staging_stat.stat.exists
+  ansible.builtin.file:
+    path: '{{ __repo_staging_dir }}'
+    owner: '{{ repo_file_owner }}'
+    group: '{{ repo_file_group }}'
+    mode: '0755'
+    state: 'directory'
+
+- name: 'Stage | download in progress (may take a while)'
+  ansible.builtin.debug:
+    msg: |
+      Assets are being downloaded. This may take a few minutes.
+
+- name: 'Stage | download asset'
+  when: not __repo_asset_stat.stat.exists
+  ansible.builtin.include_tasks: 'download.yml'
+  vars:
+    __repo_stage_asset: '{{ _repo_asset }}'
+    __repo_stage_test: 'asset'
+
+- name: 'Stage | download checksum'
+  when: >
+    repo_release_checksum | length > 0 and
+    not __repo_checksum_stat.stat.exists
+  ansible.builtin.include_tasks: 'download.yml'
+  vars:
+    __repo_stage_asset: '{{ _repo_checksum }}'
+    __repo_stage_test: 'checksum'
+
+- name: 'Stage | download signature'
+  when: >
+    repo_release_signature | length > 0 and
+    not __repo_signature_stat.stat.exists
+  ansible.builtin.include_tasks: 'download.yml'
+  vars:
+    __repo_stage_asset: '{{ _repo_signature }}'
+    __repo_stage_test: 'signature'
+
+- name: 'Stage | validate checksum'
+  when: repo_release_checksum | length > 0
+  ansible.builtin.command:
+    chdir: '{{ __repo_staging_dir }}'
+    argv:
+      - 'shasum'
+      - '--status'
+      - '--strict'
+      - '--check'
+      - '{{ _repo_checksum.name }}'
+  changed_when: false
+
+- name: 'Stage | GPG'
+  when: repo_release_signature | length > 0
+  block:
+    - name: 'Stage | GPG | local'
+      when: repo_release_gpg_key | length > 0
+      block:
+        - name: 'Stage | GPG | local | copy'
+          ansible.builtin.copy:
+            src: '{{ repo_release_gpg_key }}'
+            dest: '{{ __repo_staging_dir }}/{{ repo_release_signature }}.key'
+            owner: '{{ repo_file_owner }}'
+            group: '{{ repo_file_group }}'
+            mode: '0640'
+            directory_mode: '0755'
+
+        # Importing existing results in 'unchanged: 1' and return 0.
+        - name: 'Stage | GPG | local | import'
+          ansible.builtin.command:
+            chdir: '{{ __repo_staging_dir }}'
+            argv:
+              - 'gpg'
+              - '--import'
+              - '{{ __repo_staging_dir }}/{{ repo_release_signature }}.key'
+          changed_when: '"imported: 1" in __repo_gpg_import.stderr'
+          register: __repo_gpg_import
+
+    - name: 'Stage | GPG | key ID'
+      when: repo_release_gpg_key_id | length > 0
+      block:
+        - name: 'Stage | GPG | key ID | query existing keys'
+          ansible.builtin.command:
+            chdir: '{{ __repo_staging_dir }}'
+            argv:
+              - 'gpg'
+              - '--list-keys'
+              - '0x{{ repo_release_gpg_key_id }}'
+          changed_when: false
+          failed_when: __repo_gpg_status.rc not in (0, 2)
+          register: __repo_gpg_status
+
+        # Importing existing results in 'unchanged: 1' and return 0.
+        - name: 'Stage | GPG | key ID | import'
+          when: >
+            __repo_gpg_status.rc != 0 or
+            "expired" in __repo_gpg_status.stdout
+          ansible.builtin.command:
+            chdir: '{{ __repo_staging_dir }}'
+            argv:
+              - 'gpg'
+              - '--keyserver'
+              - '{{ repo_gpg_key_server | default(repo_role_gpg_key_server) }}'
+              - '--receive-keys'
+              - '{{ repo_release_gpg_key_id }}'
+          changed_when: '"imported: 1" in __repo_gpg_import.stderr'
+          register: __repo_gpg_import
+
+    - name: 'Stage | GPG | verify signature'
+      ansible.builtin.command:
+        chdir: '{{ __repo_staging_dir }}'
+        argv:
+          - 'gpg'
+          - '--verify'
+          - '{{ _repo_signature.name }}'
+          - '{{ _repo_asset.name }}'
+      changed_when: false

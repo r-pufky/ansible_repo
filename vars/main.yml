@@ -16,23 +16,29 @@ repo_role_validate_release: 'bookworm'
 repo_role_github_api_version: '2022-11-28'
 repo_role_codeberg_api_version: 'v1'
 
+repo_role_gpg_key_server: 'hkps://keys.openpgp.org'
+
 ###############################################################################
 # Host API Endpoints
 ###############################################################################
 # API endpoint to query for release information. Additional endpoints may be
-# used if they match github interface.
+# used if they match the general github API.
+#
+# Currently variable defined header keys do not resolve.
 #
 # Reference:
-# * https://docs.github.com/en/rest?api
+# * https://docs.github.com/en/rest/releases
 # * https://codeberg.org/api/swagger
 
 repo_role_host:
   github:
     api: 'https://api.github.com/repos'
     base: 'https://github.com'
+    auth_header: 'Authorization'
   codeberg:
     api: 'https://codeberg.org/api/v1/repos'
     base: 'https://codeberg.org'
+    auth_header: 'AuthorizationHeaderToken'
 
 ###############################################################################
 # APT Packages
@@ -45,6 +51,3 @@ repo_role_packages:
 
 repo_role_gpg_packages:
   - 'gnupg2'
-
-repo_role_testing_packages:
-  - 'rsync'  # ansible.posix.synchronize (testing local archive copy).

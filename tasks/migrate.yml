@@ -15,7 +15,7 @@
 
 - name: 'Extract | migrate | check {{ item }}'
   ansible.builtin.stat:
-    path: '{{ _repo_extract_symlink_target }}/{{ item }}'
+    path: '{{ repo_extract_symlink_target }}/{{ item }}'
   register: _repo_migrate_file
 
 - name: 'Extract | migrate | migrate {{ item }}'  # noqa risky-file-permissions keep original
@@ -24,7 +24,7 @@
     not _repo_migrate_file.stat.isdir
   ansible.builtin.copy:
     remote_src: true
-    src: '{{ _repo_extract_symlink_target }}/{{ item }}'
+    src: '{{ repo_extract_symlink_target }}/{{ item }}'
     dest: '{{ _repo_dir }}/{{ item }}'
     force: true
 
@@ -32,5 +32,5 @@
   when: >
     _repo_migrate_file.stat.exists and
     _repo_migrate_file.stat.isdir
-  ansible.builtin.command: 'cp -an "{{ _repo_extract_symlink_target }}/{{ item }}" {{ _repo_dir }}/{{ item }}'
+  ansible.builtin.command: 'cp -an "{{ repo_extract_symlink_target }}/{{ item }}" {{ _repo_dir }}/{{ item }}'
   changed_when: false

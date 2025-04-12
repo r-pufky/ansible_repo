@@ -4,42 +4,64 @@
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Live API test | verify | find extracted archive'
-      ansible.builtin.find:
-        paths: '/opt/roundcube'
-        file_type: 'directory'
-        use_regex: true
-        patterns:
-          - '.*roundcubemail-.*'  # version will change with 'latest'
-        recurse: false
-      register: _test_github_extracted_archives
+    - name: 'Live API test | verify | github'
+      when: (repo_live_api_github_enable | default(false))
+      block:
+        - name: 'Live API test | verify | github | find extracted archive'
+          ansible.builtin.find:
+            paths: '/opt/roundcube'
+            file_type: 'directory'
+            use_regex: true
+            patterns:
+              - '.*roundcubemail-.*'  # version will change with 'latest'
+            recurse: false
+          register: _test_github_extracted_archives
 
-    - name: 'Live API test | verify | archive extracted successfully'
-      ansible.builtin.assert:
-        that: _test_github_extracted_archives.files | length == 1
-        success_msg: '1 repo directory found.'
-        fail_msg: '0 or multiple repo directories found. Should be 1.'
+        - name: 'Live API test | verify | github | archive extracted successfully'
+          ansible.builtin.assert:
+            quiet: true
+            that: _test_github_extracted_archives.files | length == 1
+            fail_msg: '0 or multiple repo directories found. Should be 1.'
 
-    - name: 'Live API test | verify | README.md file removed'
-      ansible.builtin.stat:
-        path: '{{ _test_github_extracted_archives.files[0].path }}/README.md'
-      register: _test_github_live_removed_readme
+        - name: 'Live API test | verify | github | README.md file removed'
+          ansible.builtin.stat:
+            path: '{{ _test_github_extracted_archives.files[0].path }}/README.md'
+          register: _test_github_live_removed_readme
 
-    - name: 'Live API test | verify | UPGRADING file removed'
-      ansible.builtin.stat:
-        path: '{{ _test_github_extracted_archives.files[0].path }}/UPGRADING'
-      register: _test_github_live_removed_upgrading
+        - name: 'Live API test | verify | github | UPGRADING file removed'
+          ansible.builtin.stat:
+            path: '{{ _test_github_extracted_archives.files[0].path }}/UPGRADING'
+          register: _test_github_live_removed_upgrading
 
-    - name: 'Live API test | verify | config.inc.php.sample file removed'
-      ansible.builtin.stat:
-        path: '{{ _test_github_extracted_archives.files[0].path }}/config.inc.php.sample'
-      register: _test_github_live_removed_config
+        - name: 'Live API test | verify | github | config.inc.php.sample file removed'
+          ansible.builtin.stat:
+            path: '{{ _test_github_extracted_archives.files[0].path }}/config.inc.php.sample'
+          register: _test_github_live_removed_config
 
-    - name: 'Live API test | verify | expected files removed'
-      ansible.builtin.assert:
-        that:
-          - not _test_github_live_removed_readme.stat.exists
-          - not _test_github_live_removed_upgrading.stat.exists
-          - not _test_github_live_removed_config.stat.exists
-        success_msg: 'files removed successfully.'
-        fail_msg: 'file have not been removed.'
+        - name: 'Live API test | verify | github | expected files removed'
+          ansible.builtin.assert:
+            quiet: true
+            that:
+              - not _test_github_live_removed_readme.stat.exists
+              - not _test_github_live_removed_upgrading.stat.exists
+              - not _test_github_live_removed_config.stat.exists
+            fail_msg: 'files have not been removed.'
+
+    - name: 'Live API test | verify | codeberg'
+      when: (repo_live_api_codeberg_enable | default(false))
+      block:
+        - name: 'Live API test | verify | codeberg | find extracted archive'
+          ansible.builtin.find:
+            paths: '/opt/forgejo'
+            file_type: 'directory'
+            use_regex: true
+            patterns:
+              - '.*forgejo-.*'  # version will change with 'latest'
+            recurse: false
+          register: _test_codeberg_extracted_archives
+
+        - name: 'Live API test | verify | codeberg | archive extracted successfully'
+          ansible.builtin.assert:
+            quiet: true
+            that: _test_codeberg_extracted_archives.files | length == 1
+            fail_msg: '0 or multiple repo directories found. Should be 1.'

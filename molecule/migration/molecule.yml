@@ -1,8 +1,8 @@
 ---
 # yamllint disable rule:line-length
 # Confirm:
-# * releases are installed and migrated to the new version
-# * migrated files are kept to v1.0.0
+# * Releases are installed and migrated to the new version.
+# * Migrated files are kept to v1.0.0.
 dependency:
   name: 'galaxy'
 driver:
@@ -18,23 +18,32 @@ provisioner:
   inventory:
     group_vars:
       all:
+        repo_release_owner: 'test_owner'
+        repo_release_repo: 'test_repo'
+        repo_extract_dir: '/opt/test_repo_gz'
+        repo_extract_symlink_target: '/opt/test_repo_gz/test_repo'
+        repo_extract_extra_opts: '--strip-components=1'
+        repo_extract_mode: 'a-st,o-rwx'
+        repo_extract_remove_files:
+          - 'README.md'
+          - '.hidden_file'
         repo_testing_enable: true
         repo_testing_versions:
           - version: 'v1.0.0'
-            package: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz'
+            asset: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz'
           - version: 'v1.0.1'
-            package: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.1.tar.gz'
+            asset: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.1.tar.gz'
           - version: 'v1.0.1'
-            package: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.1.tar.gz'
+            asset: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.1.tar.gz'
 platforms:
-  - name: 'repo-debian-12-extract_delete_migration'
+  - name: 'repo-debian-12-migration'
     image: 'ghcr.io/hifis-net/debian-systemd:12'
     systemd: 'always'
     volumes:
       - '/sys/fs/cgroup:/sys/fs/cgroup:ro'
     command: '/lib/systemd/systemd'
     pre_build_image: true
-  - name: 'repo-debian-12-extract_delete_migration-no-keep'
+  - name: 'repo-debian-12-migration-no-keep'
     image: 'ghcr.io/hifis-net/debian-systemd:12'
     systemd: 'always'
     volumes:
@@ -54,7 +63,7 @@ scenario:
     - 'destroy'
     - 'syntax'
     - 'create'
-    - 'prepare'
+    # - 'prepare'
     - 'converge'
     # - 'idempotence'  # Files created, extracted, created, deleted.
     # - 'side_effect'

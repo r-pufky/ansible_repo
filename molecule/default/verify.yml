@@ -4,23 +4,31 @@
   gather_facts: false
   tasks:
     - name: 'Default | verify | test extraction'
-      ansible.builtin.include_tasks: 'tests/test_extraction.yml'
+      ansible.builtin.include_tasks: 'tests/extraction.yml'
       loop:
-        - type: 'tar.gz'
+        - asset: '/tmp/test_repo-v1.0.0.tar.gz'
           path: '/opt/test_repo_gz/test_repo-v1.0.0'
           opts: true
-          archive: '/tmp/test_repo-v1.0.0.tar.gz'
           clean: true
+          binary: false
           symlink: ''
-        - type: 'tar.xz'
+        - asset: '/tmp/test_repo-v1.0.0.tar.xz'
           path: '/opt/test_repo_xz/test_repo-v1.0.0'
           opts: true
-          archive: '/tmp/test_repo-v1.0.0.tar.xz'
           clean: true
+          binary: false
           symlink: ''
-        - type: 'zip'
+        - asset: '/tmp/test_archive_v1.0.0.zip'
           path: '/opt/test_repo_zip/test_repo-v1.0.0'
           opts: false
-          archive: '/tmp/test_repo-v1.0.0.zip'
           clean: false
+          binary: false
           symlink: '/opt/test_repo_zip/test_repo'
+        - asset: '/tmp/test_binary_v1.0.0'
+          path: '/opt/test_repo_binary/test_repo-v1.0.0'
+          opts: false
+          clean: false
+          binary: true
+          symlink: '/opt/test_repo_binary/test_repo'
+      loop_control:
+        label: '{{ item.asset }}'

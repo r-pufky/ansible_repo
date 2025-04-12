@@ -1,8 +1,17 @@
 ---
 # yamllint disable rule:line-length
+#
+# Create detached signatures for signature verification:
+#
+#   gpg --output {FILE}.asc --detach-sig {FILE}
+#
 # Confirm:
-# * all three archive types are extracted correctly.
-# * migrated files are not migrated due to brand new installation.
+# * Supported formats are installed correctly (tar.*, zip, binaries).
+# * Correct checksums pass correctly.
+# * GPG signature validation works using key ID.
+# * GPG signature validation works using file.
+# * Static URL's are properly installed.
+# * Pre-releases are properly installed.
 dependency:
   name: 'galaxy'
 driver:
@@ -18,15 +27,43 @@ provisioner:
   inventory:
     group_vars:
       all:
+        repo_release_owner: 'test_owner'
+        repo_release_repo: 'test_repo'
+        repo_release_gpg_key_id: '466EEC2B67516C7117C85CE3A0BC35D16698BAB9'
         repo_testing_enable: true
-        repo_extract_migrate_files: ['config/db/db_skeleton_file.db']
         repo_testing_versions:
-          - version: 'v1.0.0'
-            package: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz'
-          - version: 'v1.0.0'
-            package: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.xz'
-          - version: 'v1.0.0'
-            package: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.zip'
+          - comment: 'tar.gz with key ID'
+            version: 'v1.0.0'
+            asset: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz'
+            checksum: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/cache/test_archive_v1.0.0.tar.gz.sha256'
+            signature: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz.asc'
+          - comment: 'tar.gz with file signature'
+            version: 'v1.0.0'
+            asset: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz'
+            checksum: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/cache/test_archive_v1.0.0.tar.gz.sha256'
+            signature: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz.asc'
+          - comment: 'tar.gz with asset, checksum, signature version parsing'
+            version: 'v1.0.0'
+            asset: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz'
+            checksum: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/cache/test_archive_v1.0.0.tar.gz.sha256'
+            signature: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz.asc'
+          - comment: 'tar.xz'
+            version: 'v1.0.0'
+            asset: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.xz'
+          - comment: 'zip'
+            version: 'v1.0.0'
+            asset: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.zip'
+          - comment: 'binary'
+            version: 'v1.0.0'
+            asset: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/cache/test_binary_v1.0.0'
+          - comment: 'static URL'
+            version: 'v1.0.0'
+            asset: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz'
+          - comment: 'pre-release'
+            version: 'v1.0.0'
+            asset: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz'
+            checksum: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/cache/test_archive_v1.0.0.tar.gz.sha256'
+            signature: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz.asc'
 platforms:
   - name: 'repo-debian-12-default'
     image: 'ghcr.io/hifis-net/debian-systemd:12'

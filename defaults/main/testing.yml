@@ -9,10 +9,8 @@
 # Enable testing.
 #
 # This will disable API use and instead return testing values for requested
-# versions as well as a locally sourced archive to extract in place of
-# downloading the file from the repo endpoint.
-#
-# TODO(role): determine if GPG validation should be enforced.
+# versions as well as a locally sourced asset in place of downloading the file
+# from the repo endpoint.
 #
 # molecule test -s live_api_test -- -v -e 'repo_testing_enable=true,repo_host_access_token={TOKEN}'
 #
@@ -23,8 +21,9 @@ repo_testing_enable: false
 #
 # repo_testing_versions:
 #     list of dict - Simulated multiple repo calls in a play.
-#   - version: str - Requested version.
-#     package: str - Path to controller file to return.
+#   - comment: str - Testing comment.
+#     version: str - Requested version.
+#     asset: str - Path to controller file to return.
 #     checksum: str - Path to controller checksum to return.
 #     signature: str - Path to controller signature file to return.
 #

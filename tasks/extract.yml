@@ -3,16 +3,17 @@
 ###############################################################################
 # Unpack Github Archive
 ###############################################################################
-# Create versioned directory and unpack 'complete' archive.
+# Create versioned directory and unpack or copy asset.
 #
 # Args:
-#   _repo_archive: str - local versioned archive location.
-#   _repo_dir: str - local versioned extract location.
-#   _repo_extract_stat: stat - for existing extract location.
-#   _repo_target: str - Full version (vx.x.x) to install.
+#   _repo_asset: dict - asset metadata.
+#   _repo_dir: str - versioned repository extract location.
+#   __repo_extract_stat: stat - for existing extract location.
+#   __repo_extract_dir: str - Extract location for downloads, extracts.
+#   _repo_tag: str - Full version (vx.x.x) to install.
 
 - name: 'Extract | create extract directory'
-  when: not _repo_extract_stat.stat.exists
+  when: not __repo_extract_stat.stat.exists
   ansible.builtin.file:
     path: '{{ _repo_dir }}'
     owner: '{{ repo_file_owner }}'
@@ -21,9 +22,12 @@
     state: 'directory'
 
 - name: 'Extract | unpack archive'
-  when: not _repo_extract_stat.stat.exists
+  when: >
+    not __repo_extract_stat.stat.exists and
+    ('.tar.' in _repo_asset.name or
+     '.zip' in _repo_asset.name)
   ansible.builtin.unarchive:
-    src: '{{ _repo_archive }}'
+    src: '{{ __repo_staging_dir }}/{{ _repo_asset.name }}'
     remote_src: true
     dest: '{{ _repo_dir }}'
     owner: '{{ repo_file_owner | default("root", true) }}'
@@ -31,9 +35,22 @@
     mode: '{{ repo_extract_mode | default("0644", true) }}'
     extra_opts: '{{ repo_extract_extra_opts | default(omit, true) }}'
 
-- name: 'Extract | cleanup non-required archive source files'
+- name: 'Extract | copy non-archive'
   when: >
-    not _repo_extract_stat.stat.exists and
+    not __repo_extract_stat.stat.exists and
+    '.tar.' not in _repo_asset.name and
+    '.zip' not in _repo_asset.name
+  ansible.builtin.copy:
+    src: '{{ __repo_staging_dir }}/{{ _repo_asset.name }}'
+    remote_src: true
+    dest: '{{ _repo_dir }}/{{ _repo_asset.name }}'
+    owner: '{{ repo_file_owner | default("root", true) }}'
+    group: '{{ repo_file_group | default("root", true) }}'
+    mode: '{{ repo_extract_mode | default("0644", true) }}'
+
+- name: 'Extract | remove files'
+  when: >
+    not __repo_extract_stat.stat.exists and
     repo_extract_remove_files | length > 0
   ansible.builtin.file:
     path: '{{ _repo_dir }}/{{ item }}'
@@ -42,23 +59,23 @@
 
 - name: 'Extract | check for existing symlink'
   ansible.builtin.stat:
-    path: '{{ _repo_extract_symlink_target }}'
+    path: '{{ repo_extract_symlink_target }}'
   check_mode: true
-  register: _repo_symlink_stat
+  register: __repo_symlink_stat
 
 # Migrate files before removing symlink to old version.
 - name: 'Extract | migrate'
   when: >
-    _repo_symlink_stat.stat.exists and
+    __repo_symlink_stat.stat.exists and
     repo_extract_migrate_files | length > 0
   ansible.builtin.include_tasks: 'migrate.yml'
   loop: '{{ repo_extract_migrate_files }}'
 
-- name: 'Extract | symlink {{ _repo_dir }} to {{ _repo_extract_symlink_target }}'  # noqa name[template] provide full symlink info
-  when: _repo_extract_symlink_target
+- name: 'Extract | symlink {{ _repo_dir }} to {{ repo_extract_symlink_target }}'  # noqa name[template] provide full symlink info
+  when: repo_extract_symlink_target
   ansible.builtin.file:
     src: '{{ _repo_dir }}'
-    dest: '{{ _repo_extract_symlink_target }}'
+    dest: '{{ repo_extract_symlink_target }}'
     owner: '{{ repo_file_owner }}'
     group: '{{ repo_file_group }}'
     force: true
@@ -69,25 +86,25 @@
   block:
     - name: 'Extract | find existing extracted archives'
       ansible.builtin.find:
-        paths: '{{ _repo_extract_dir }}'
+        paths: '{{ __repo_extract_dir }}'
         file_type: 'directory'
         use_regex: true
         patterns:
           - '.*{{ repo_release_repo }}-.*'
         recurse: false
-      register: _repo_install_stat
+      register: __repo_install_stat
 
     - name: 'Extract | delete old versions'
-      when: _repo_target != item.path | basename | regex_replace(repo_release_repo ~ '-', '')
+      when: _repo_tag != item.path | basename | regex_replace(repo_release_repo ~ '-', '')
       ansible.builtin.file:
         path: '{{ item.path }}'
         state: 'absent'
-      loop: '{{ _repo_install_stat.files }}'
+      loop: '{{ __repo_install_stat.files }}'
       loop_control:
         label: '{{ item.path }}'
 
 - name: 'Extract | cleanup staging archive'
   when: repo_staging_clean
   ansible.builtin.file:
-    path: '{{ _repo_archive }}'
+    path: '{{ __repo_staging_dir }}/{{ _repo_asset.name }}'
     state: 'absent'

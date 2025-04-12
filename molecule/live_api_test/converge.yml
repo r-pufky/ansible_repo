@@ -3,21 +3,32 @@
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Live API test | converge | apply r_pufky.srv.github'
-      when: github_live_api_enable
+    - name: 'Live API test | converge | apply r_pufky.srv.repo (github)'
+      when: (repo_live_api_github_enable | default(false))
       ansible.builtin.include_role:
-        name: 'r_pufky.srv.github'
+        name: 'r_pufky.srv.repo'
       vars:
-        github_repo_archive_type: 'tar.gz'
-        github_repo_release_owner: 'roundcube'
-        github_repo_release_repo: 'roundcubemail'
-        github_repo_release: 'latest'
-        github_file_owner: 'root'
-        github_file_group: 'root'
-        github_extract_dest: '/opt/roundcube'
-        github_extract_extra_opts: '--strip-components=1'
-        github_extract_mode: 'a-st,o-rwx'
-        github_extract_remove_files:
+        repo_release_owner: 'roundcube'
+        repo_release_repo: 'roundcubemail'
+        repo_release_asset: 'roundcubemail-{VERSION}.tar.gz'
+        repo_extract_dir: '/opt/roundcube'
+        repo_extract_remove_files:
           - 'README.md'
           - 'UPGRADING'
           - 'config/config.inc.php.sample'
+
+    - name: 'Live API test | converge | apply r_pufky.srv.repo (codeberg)'
+      when: (repo_live_api_codeberg_enable | default(false))
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.repo'
+      vars:
+        repo_host: 'codeberg'
+        repo_release_owner: 'forgejo'
+        repo_release_repo: 'forgejo'
+        repo_release_asset: 'forgejo-{BARE_VERSION}-linux-amd64'
+        repo_release_checksum: 'forgejo-{BARE_VERSION}-linux-amd64.sha256'
+        repo_release_signature: 'forgejo-{BARE_VERSION}-linux-amd64.asc'
+        repo_release_gpg_key_id: 'EB114F5E6C0DC2BCDD183550A4B61A2DC5923710'
+        repo_extract_mode: 'a-st,o=rwx,g=rx,o-rwx'
+        repo_release_specifier: 'v'
+        repo_extract_dir: '/opt/forgejo'

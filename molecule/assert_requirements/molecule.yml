@@ -1,7 +1,7 @@
 ---
 # yamllint disable rule:line-length
 # Confirm:
-# * pre release downloads enable the correct target url.
+# * Test all assertions are triggered correctly.
 dependency:
   name: 'galaxy'
 driver:
@@ -18,13 +18,8 @@ provisioner:
     group_vars:
       all:
         repo_testing_enable: true
-        repo_testing_versions:
-          - version: 'v1.0.0'
-            package: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz'
-        repo_release_pre_enable: true
-        repo_extract_migrate_files: ['config/db/db_skeleton_file.db']
 platforms:
-  - name: 'repo-debian-12-pre_release'
+  - name: 'repo-debian-12-assert_requirements'
     image: 'ghcr.io/hifis-net/debian-systemd:12'
     systemd: 'always'
     volumes:
@@ -44,10 +39,10 @@ scenario:
     - 'destroy'
     - 'syntax'
     - 'create'
-    - 'prepare'
+    # - 'prepare'
     - 'converge'
-    # - 'idempotence'  # Files created, extracted, created, deleted.
+    - 'idempotence'  # Files created, extracted, created, deleted.
     # - 'side_effect'
-    # - 'verify'  # testing role parameters done in converge
+    - 'verify'
     # - 'cleanup'
     - 'destroy'

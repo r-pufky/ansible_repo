@@ -1,5 +1,8 @@
 ---
 # yamllint disable rule:line-length
+- name: 'Assert'
+  ansible.builtin.include_tasks: 'assert.yml'
+
 - name: 'Install packages'
   ansible.builtin.include_role:
     name: 'r_pufky.srv.apt'
@@ -7,12 +10,12 @@
     apt_packages:
       - '{{ repo_role_packages }}'
       - '{{ repo_role_gpg_packages if repo_release_signature | length > 0 else [] }}'
-      - '{{ repo_role_testing_packages if repo_testing_enable else [] }}'
+      # - '{{ repo_role_testing_packages if repo_testing_enable else [] }}'
     apt_package_update_cache: true
 
 - name: 'Prep'
   ansible.builtin.include_tasks: 'prep.yml'
-- name: 'Download'
-  ansible.builtin.include_tasks: 'download.yml'
+- name: 'Stage'
+  ansible.builtin.include_tasks: 'stage.yml'
 - name: 'Extract'
   ansible.builtin.include_tasks: 'extract.yml'

@@ -1,0 +1,54 @@
+---
+# yamllint disable rule:line-length
+- name: 'Extract delete migration | converge'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Extract delete migration | converge | apply r_pufky.srv.repo (v1.0.0)'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.repo'
+      vars:
+        repo_release_asset: 'test_archive_v1.0.0.tar.gz'
+        repo_extract_migrate_files: ['config/db/db_skeleton_file.db']
+
+    - name: 'Extract delete migration | converge | add non-repo directory'
+      ansible.builtin.file:
+        path: '/opt/test_repo_gz/this_dir_should_not_be_removed'
+        owner: 'root'
+        group: 'root'
+        mode: '0755'
+        state: 'directory'
+
+    - name: 'Extract delete migration | converge | add non-repo directory'
+      ansible.builtin.file:
+        path: '/opt/test_repo_gz/this_file_should_not_be_removed'
+        owner: 'root'
+        group: 'root'
+        mode: '0755'
+        state: 'touch'
+
+- name: 'Extract delete migration | converge | migrate data'
+  hosts: 'repo-debian-12-migration'
+  gather_facts: false
+  tasks:
+    - name: 'Extract delete migration | converge | apply r_pufky.srv.repo (v1.0.1)'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.repo'
+      vars:
+        repo_release_asset: 'test_archive_v1.0.1.tar.gz'
+        repo_extract_migrate_files:
+          - 'config/db/db_skeleton_file.db'
+          - 'non_existing_file_should_be_skipped_no_errors'
+          - 'nested_migration'
+        repo_extract_delete_old_versions: true
+
+- name: 'Extract delete migration | converge | no migration'
+  hosts: 'repo-debian-12-migration-no-keep'
+  gather_facts: false
+  tasks:
+    - name: 'Extract delete migration | converge | apply r_pufky.srv.repo (v1.0.1)'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.repo'
+      vars:
+        repo_release_asset: 'test_archive_v1.0.1.tar.gz'
+        repo_extract_delete_old_versions: true

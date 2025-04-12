@@ -5,11 +5,11 @@
     path: '{{ item.path }}'
   register: _test_repo_dest
 
-- name: 'Default | verify | {{ item.type }} extracted to {{ item.path }}'  # noqa name[template] extra information required for sane testing
+- name: 'Default | verify | {{ item.asset }} extracted to {{ item.path }}'  # noqa name[template] extra information required for sane testing
   ansible.builtin.assert:
+    quiet: true
     that: _test_repo_dest.stat.exists
-    success_msg: '{{ item.type }} extracted correctly.'
-    fail_msg: '{{ item.type }} NOT extracted correctly.'
+    fail_msg: '{{ item.asset }} NOT extracted correctly.'
 
 - name: 'Default | verify | query {{ item.path }}/README.md'  # noqa name[template] extra information required for sane testing
   ansible.builtin.stat:
@@ -18,8 +18,8 @@
 
 - name: 'Default | verify | standard file removed: {{ item.path }}/README.md'  # noqa name[template] extra information required for sane testing
   ansible.builtin.assert:
+    quiet: true
     that: not _test_repo_file_deleted.stat.exists
-    success_msg: '{{ item.path }}/README.md removed correctly.'
     fail_msg: '{{ item.path }}/README.md exists. It should have been deleted.'
 
 - name: 'Default | verify | query {{ item.path }}/.hidden_file'  # noqa name[template] extra information required for sane testing
@@ -29,32 +29,32 @@
 
 - name: 'Default | verify | standard file removed: {{ item.path }}/.hidden_file'  # noqa name[template] extra information required for sane testing
   ansible.builtin.assert:
+    quiet: true
     that: not _test_repo_file_hidden_deleted.stat.exists
-    success_msg: '{{ item.path }}/.hidden_file removed correctly.'
     fail_msg: '{{ item.path }}/.hidden_file exists. It should have been deleted.'
 
-- name: 'Default | verify | query {{ item.type }} extra opts'  # noqa name[template] extra information required for sane testing
+- name: 'Default | verify | query {{ item.asset }} extra opts'  # noqa name[template] extra information required for sane testing
   ansible.builtin.stat:
     path: '{{ item.path }}/test_archive'
   register: _test_repo_extra_opts
 
-- name: 'Default | verify | {{ item.type }} extra opts stripped first level'  # noqa name[template] extra information required for sane testing
-  when: item.opts
+- name: 'Default | verify | {{ item.asset }} extra opts stripped first level'  # noqa name[template] extra information required for sane testing
+  when: item.opts and not item.binary
   ansible.builtin.assert:
+    quiet: true
     that: not _test_repo_extra_opts.stat.exists
-    success_msg: 'top level directory removed correctly.'
     fail_msg: 'top level directory "test_archive" should not exist.'
 
-- name: 'Default | verify | {{ item.type }} extra opts kept first level'  # noqa name[template] extra information required for sane testing
-  when: not item.opts
+- name: 'Default | verify | {{ item.asset }} extra opts kept first level'  # noqa name[template] extra information required for sane testing
+  when: not item.opts and not item.binary
   ansible.builtin.assert:
+    quiet: true
     that: _test_repo_extra_opts.stat.exists
-    success_msg: 'top level directory "test_archive" kept.'
     fail_msg: 'top level directory "test_archive" deleted. Should be kept.'
 
-- name: 'Default | verify | query {{ item.archive }}'
+- name: 'Default | verify | query {{ item.asset }}'
   ansible.builtin.stat:
-    path: '{{ item.archive }}'
+    path: '{{ item.asset }}'
   register: _test_repo_archive_deleted
 
 - name: 'Default | verify | query {{ item.symlink }}'
@@ -65,32 +65,44 @@
 - name: 'Default | verify | symlink not created'
   when: item.symlink | length == 0
   ansible.builtin.assert:
+    quiet: true
     that: not _test_repo_symlink.stat.exists
-    success_msg: 'symlink does not exist.'
     fail_msg: 'symlink exists. It should not exist.'
 
 - name: 'Default | verify | symlink created'
-  when: item.symlink | length > 0
+  when: item.symlink | length > 0 and not item.binary
   ansible.builtin.assert:
+    quiet: true
     that:
       - _test_repo_symlink.stat.exists
       - _test_repo_symlink.stat.islnk
       - _test_repo_symlink.stat.lnk_source == '/opt/test_repo_zip/test_repo-v1.0.0'
       - _test_repo_symlink.stat.pw_name == 'root'
       - _test_repo_symlink.stat.gr_name == 'root'
-    success_msg: 'symlink created correctly.'
+    fail_msg: 'symlink does not exist or is not setup correctly.'
+
+- name: 'Default | verify | symlink created'
+  when: item.symlink | length > 0 and item.binary
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - _test_repo_symlink.stat.exists
+      - _test_repo_symlink.stat.islnk
+      - _test_repo_symlink.stat.lnk_source == '/opt/test_repo_binary/test_repo-v1.0.0'
+      - _test_repo_symlink.stat.pw_name == 'root'
+      - _test_repo_symlink.stat.gr_name == 'root'
     fail_msg: 'symlink does not exist or is not setup correctly.'
 
 - name: 'Default | verify | repo_staging_clean'
   when: item.clean
   ansible.builtin.assert:
+    quiet: true
     that: not _test_repo_archive_deleted.stat.exists
-    success_msg: '{{ item.archive }} removed correctly.'
-    fail_msg: '{{ item.archive }} exists. It should have been deleted.'
+    fail_msg: '{{ item.asset }} exists. It should have been deleted.'
 
 - name: 'Default | verify | repo_staging_clean'
   when: not item.clean
   ansible.builtin.assert:
+    quiet: true
     that: _test_repo_archive_deleted.stat.exists
-    success_msg: '{{ item.archive }} exists.'
-    fail_msg: '{{ item.archive }} missing. It should exist.'
+    fail_msg: '{{ item.asset }} missing. It should exist.'

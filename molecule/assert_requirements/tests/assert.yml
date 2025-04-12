@@ -1,0 +1,28 @@
+---
+# yamllint disable rule:line-length
+- name: 'Assert failures | converge | {{ test_name }}'
+  block:
+    - name: 'Assert failures | converge | required options | owner | test setup'
+      ansible.builtin.set_fact:
+        _test_failed: true
+
+    - name: 'Assert failures | converge | required options | owner | missing assertion'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.repo'
+
+  rescue:
+    - name: 'Assert failures | converge | required options | owner | PASS'
+      ansible.builtin.set_fact:
+        _test_failed: false
+
+    - name: 'Assert failures | converge | required options | owner | PASS'
+      ansible.builtin.debug:
+        msg: |
+
+          TEST PASSED.
+
+  always:
+    - name: 'Assert failures | converge | required options | owner | FAIL'
+      when: _test_failed
+      ansible.builtin.fail:
+        msg: '{{ test_fail_message }}'
