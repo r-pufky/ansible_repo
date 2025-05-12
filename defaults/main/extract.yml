@@ -37,7 +37,7 @@ repo_extract_dir: '/tmp'
 # Default: '--strip-components=1'.
 repo_extract_extra_opts: '--strip-components=1'
 
-# Apply permissions to extracted files.
+# Apply permissions to extracted files and created directories.
 #
 # Explicitly set extraction mode to avoid CVE-2020-1736.
 #
@@ -47,12 +47,20 @@ repo_extract_extra_opts: '--strip-components=1'
 # * https://nvd.nist.gov/vuln/detail/CVE-2020-1736
 repo_extract_mode: 'a-st,o-rwx'
 
+# Apply permissions to binary assets.
+#
+# Binary asset downloads use repo_extract_mode to set directory permissions and
+# repo_extract_binary_mode for the asset itself.
+#
+# Default: '0755'.
+repo_extract_binary_mode: '0755'
+
 # List of extracted files to remove. Default: [] (none).
 repo_extract_remove_files: []
 
 # Migrate listed files to newly installed release.
 #
-# Requires repo_extract_symlink_target set.
+# Requires repo_extract_symlink set.
 #
 # After extraction and repo_extract_remove_files are removed, migrate files
 # from old version to the new version; preserving ownership and permissions.
@@ -71,19 +79,23 @@ repo_extract_remove_files: []
 # Default: [] (no migration).
 repo_extract_migrate_files: []
 
-# Create a symlink to versioned extracted archive?
+# Create a symlink to versioned asset?
 #
-# Symlink will be FORCE created, linking the extracted versioned archive to the
-# specified location. Target root directory must exist.
+# Symlink will be FORCE created, linking to extracted archive directory or
+# binary.
 #
 # repo_release_repo: 'myrepo'
-# repo_release_tag: 'latest'
+# repo_release_tag: 'latest'  # v1.0.0
 # repo_extract_dir: '/opt/myrepo'
-# repo_extract_symlink_target: '/opt/myrepo/myrepo'
+# repo_extract_symlink: '/opt/myrepo/myrepo'
 #
-# Results (if latest version is v1.0.0):
+# Archive Asset:
 #
 #   /opt/myrepo/myrepo -> /opt/myrepo/myrepo-v1.0.0
+#
+# Binary Asset:
+#
+#   /opt/myrepo/myrepo -> /opt/myrepo/myrepo-v1.0.0/myrepo-binary-amd64
 #
 # Equivalent to: ln -s -f /opt/myrepo/myrepo-v1.0.0 /opt/myrepo/myrepo
 #
@@ -91,7 +103,7 @@ repo_extract_migrate_files: []
 #   '': Disable symlink creation (default).
 #
 # Default: '' (disabled).
-repo_extract_symlink_target: ''
+repo_extract_symlink: ''
 
 # Delete old extracted archive versions?
 #

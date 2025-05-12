@@ -147,7 +147,7 @@
         repo_release_asset: 'test_archive_v1.0.0.zip'
         repo_staging_clean: false
         repo_extract_dir: '/opt/test_repo_zip'
-        repo_extract_symlink_target: '/opt/test_repo_zip/test_repo'  # should not affect test
+        repo_extract_symlink: '/opt/test_repo_zip/test_repo'  # should not affect test
         repo_extract_extra_opts: ''
         repo_extract_remove_files:
           - 'README.md'
@@ -180,7 +180,8 @@
         repo_release_asset: 'test_binary_v1.0.0'
         repo_staging_clean: false
         repo_extract_dir: '/opt/test_repo_binary'
-        repo_extract_symlink_target: '/opt/test_repo_binary/test_repo'
+        repo_extract_binary_mode: '0755'
+        repo_extract_symlink: '/opt/test_repo_binary/test_repo'
 
     - name: 'Default | converge | assert r_pufky.srv.repo (binary)'
       ansible.builtin.assert:
@@ -209,7 +210,7 @@
         repo_release_asset: 'test_archive_v1.0.0.tar.gz'
         repo_staging_clean: false
         repo_extract_dir: '/opt/test_repo_static'
-        repo_extract_symlink_target: '/opt/test_repo_static/test_repo'
+        repo_extract_symlink: '/opt/test_repo_static/test_repo'
         repo_release_asset_static_url: 'https://example.com/alt/repo/binary.tar.gz'
 
     - name: 'Default | converge | assert r_pufky.srv.repo (static URL)'

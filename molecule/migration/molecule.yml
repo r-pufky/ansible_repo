@@ -21,7 +21,7 @@ provisioner:
         repo_release_owner: 'test_owner'
         repo_release_repo: 'test_repo'
         repo_extract_dir: '/opt/test_repo_gz'
-        repo_extract_symlink_target: '/opt/test_repo_gz/test_repo'
+        repo_extract_symlink: '/opt/test_repo_gz/test_repo'
         repo_extract_extra_opts: '--strip-components=1'
         repo_extract_mode: 'a-st,o-rwx'
         repo_extract_remove_files:

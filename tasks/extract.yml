@@ -43,10 +43,11 @@
   ansible.builtin.copy:
     src: '{{ __repo_staging_dir }}/{{ _repo_asset.name }}'
     remote_src: true
-    dest: '{{ _repo_dir }}/{{ _repo_asset.name }}'
+    dest: '{{ _repo_dir }}'
     owner: '{{ repo_file_owner | default("root", true) }}'
     group: '{{ repo_file_group | default("root", true) }}'
-    mode: '{{ repo_extract_mode | default("0644", true) }}'
+    directory_mode: '{{ repo_extract_mode | default("0644", true) }}'
+    mode: '{{ repo_extract_binary_mode | default("0755", true) }}'
 
 - name: 'Extract | remove files'
   when: >
@@ -59,7 +60,7 @@
 
 - name: 'Extract | check for existing symlink'
   ansible.builtin.stat:
-    path: '{{ repo_extract_symlink_target }}'
+    path: '{{ repo_extract_symlink }}'
   check_mode: true
   register: __repo_symlink_stat
 
@@ -71,15 +72,32 @@
   ansible.builtin.include_tasks: 'migrate.yml'
   loop: '{{ repo_extract_migrate_files }}'
 
-- name: 'Extract | symlink {{ _repo_dir }} to {{ repo_extract_symlink_target }}'  # noqa name[template] provide full symlink info
-  when: repo_extract_symlink_target
-  ansible.builtin.file:
-    src: '{{ _repo_dir }}'
-    dest: '{{ repo_extract_symlink_target }}'
-    owner: '{{ repo_file_owner }}'
-    group: '{{ repo_file_group }}'
-    force: true
-    state: 'link'
+- name: 'Extract | symlink'
+  when: repo_extract_symlink
+  block:
+    - name: 'Extract | symlink {{ repo_extract_symlink }} -> {{ _repo_dir }}/{{ _repo_asset.name }}'  # noqa name[template] provide full symlink info
+      when: >
+        '.tar.' not in _repo_asset.name and
+        '.zip' not in _repo_asset.name
+      ansible.builtin.file:
+        src: '{{ _repo_dir }}/{{ _repo_asset.name }}'
+        dest: '{{ repo_extract_symlink }}'
+        owner: '{{ repo_file_owner }}'
+        group: '{{ repo_file_group }}'
+        force: true
+        state: 'link'
+
+    - name: 'Extract | symlink {{ repo_extract_symlink }} -> {{ _repo_dir }}'  # noqa name[template] provide full symlink info
+      when: >
+        '.tar.' in _repo_asset.name or
+        '.zip' in _repo_asset.name
+      ansible.builtin.file:
+        src: '{{ _repo_dir }}'
+        dest: '{{ repo_extract_symlink }}'
+        owner: '{{ repo_file_owner }}'
+        group: '{{ repo_file_group }}'
+        force: true
+        state: 'link'
 
 - name: 'Extract | remove old versions'
   when: repo_extract_delete_old_versions

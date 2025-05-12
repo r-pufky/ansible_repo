@@ -81,17 +81,31 @@
       - _test_repo_symlink.stat.gr_name == 'root'
     fail_msg: 'symlink does not exist or is not setup correctly.'
 
-- name: 'Default | verify | symlink created'
+- name: 'Default | verify | symlink binary'
   when: item.symlink | length > 0 and item.binary
-  ansible.builtin.assert:
-    quiet: true
-    that:
-      - _test_repo_symlink.stat.exists
-      - _test_repo_symlink.stat.islnk
-      - _test_repo_symlink.stat.lnk_source == '/opt/test_repo_binary/test_repo-v1.0.0'
-      - _test_repo_symlink.stat.pw_name == 'root'
-      - _test_repo_symlink.stat.gr_name == 'root'
-    fail_msg: 'symlink does not exist or is not setup correctly.'
+  block:
+    - name: 'Default | verify | symlink binary | symlink'
+      ansible.builtin.assert:
+        quiet: true
+        that:
+          - _test_repo_symlink.stat.exists
+          - _test_repo_symlink.stat.islnk
+          - _test_repo_symlink.stat.lnk_source == '/opt/test_repo_binary/test_repo-v1.0.0/test_binary_v1.0.0'
+          - _test_repo_symlink.stat.pw_name == 'root'
+          - _test_repo_symlink.stat.gr_name == 'root'
+        fail_msg: 'symlink does not exist or is not setup correctly.'
+
+    - name: 'Default | verify | symlink binary | query binary'
+      ansible.builtin.stat:
+        path: '/opt/test_repo_binary/test_repo-v1.0.0/test_binary_v1.0.0'
+      register: _test_repo_binary_stat
+
+    - name: 'Default | verify | symlink binary | assert binary'
+      ansible.builtin.assert:
+        quiet: true
+        that:
+          - _test_repo_binary_stat.stat.mode == '0755'
+        fail_msg: 'symlink binary should be 0755.'
 
 - name: 'Default | verify | repo_staging_clean'
   when: item.clean
