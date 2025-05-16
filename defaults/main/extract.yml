@@ -11,6 +11,7 @@
 #
 # Reference:
 # * https://docs.ansible.com/ansible/latest/collections/ansible/builtin/unarchive_module.html
+# yamllint enable rule:line-length
 
 # Extracted archive directory base.
 #
@@ -73,7 +74,8 @@ repo_extract_remove_files: []
 #
 # repo_extract_migrate_files:
 #   - 'config.db'  # v1.2/config.db -> v1.3/config.db
-#   - 'settings/alt/config.yaml'  # v1.2/settings/alt/config.yaml -> v1.3/settings/alt/config.yaml
+#   - 'settings/alt/config.yaml'  # v1.2/settings/alt/config.yaml ->
+#                                   v1.3/settings/alt/config.yaml
 #   - 'data_directory'  # v1.2/data_directory/ -> v1.3/data_directory/
 #
 # Default: [] (no migration).

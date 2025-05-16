@@ -1,8 +1,7 @@
 ---
 ###############################################################################
-# Github REST API
+# Repo Download Manager
 ###############################################################################
-# TODO(sync): Keep features in sync with ansible_codeberg.
 #
 # Reference:
 # * https://docs.github.com/en/rest/about-the-rest-api/api-versions

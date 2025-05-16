@@ -3,10 +3,10 @@
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Live API test | converge | apply r_pufky.srv.repo (github)'
+    - name: 'Live API test | converge | apply r_pufky.deb.repo (github)'
       when: (repo_live_api_github_enable | default(false))
       ansible.builtin.include_role:
-        name: 'r_pufky.srv.repo'
+        name: 'r_pufky.deb.repo'
       vars:
         repo_release_owner: 'roundcube'
         repo_release_repo: 'roundcubemail'
@@ -17,10 +17,10 @@
           - 'UPGRADING'
           - 'config/config.inc.php.sample'
 
-    - name: 'Live API test | converge | apply r_pufky.srv.repo (codeberg)'
+    - name: 'Live API test | converge | apply r_pufky.deb.repo (codeberg)'
       when: (repo_live_api_codeberg_enable | default(false))
       ansible.builtin.include_role:
-        name: 'r_pufky.srv.repo'
+        name: 'r_pufky.deb.repo'
       vars:
         repo_host: 'codeberg'
         repo_release_owner: 'forgejo'

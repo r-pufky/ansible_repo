@@ -1,18 +1,21 @@
 ---
-# yamllint disable rule:line-length
+###############################################################################
+# Converge
+###############################################################################
 # Role variable returned variables are scoped to the current play only (e.g.
 # converge.yml) and must be tested between each application of the role. Test
 # these values while converging versus verify.yml (where scoping will prevent)
 # testing these values.
 #
 # Roles consuming this role do not need to test this way.
+
 - name: 'Default | converge'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Default | converge | apply r_pufky.srv.repo (tar.gz)'
+    - name: 'Default | converge | apply r_pufky.deb.repo (tar.gz)'
       ansible.builtin.include_role:
-        name: 'r_pufky.srv.repo'
+        name: 'r_pufky.deb.repo'
       vars:
         repo_release_asset: 'test_archive_v1.0.0.tar.gz'
         repo_release_checksum: 'test_archive_v1.0.0.tar.gz.sha256'
@@ -22,7 +25,7 @@
           - 'README.md'
           - '.hidden_file'
 
-    - name: 'Default | converge | assert r_pufky.srv.repo (tar.gz)'
+    - name: 'Default | converge | assert r_pufky.deb.repo (tar.gz)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -33,7 +36,7 @@
           - _repo_checksum is mapping
           - _repo_signature is mapping
         fail_msg: |
-          Exported variables are not set correctly.
+          ✘ Exported variables are not set correctly.
 
           _repo_tag: {{ _repo_tag }}
           _repo_dir: {{ _repo_dir }}
@@ -42,12 +45,15 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.srv.repo (file signature)'
+    - name: 'Default | converge | apply r_pufky.deb.repo (file signature)'
       ansible.builtin.include_role:
-        name: 'r_pufky.srv.repo'
+        name: 'r_pufky.deb.repo'
       vars:
         repo_release_asset: 'test_archive_v1.0.0.tar.gz'
-        repo_release_gpg_key: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/cache/466EEC2B67516C7117C85CE3A0BC35D16698BAB9.asc'
+        repo_release_gpg_key: '{{
+            lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~
+            "/molecule/cache/466EEC2B67516C7117C85CE3A0BC35D16698BAB9.asc"
+          }}'
         repo_release_gpg_key_id: ''
         repo_release_checksum: 'test_archive_v1.0.0.tar.gz.sha256'
         repo_release_signature: 'test_archive_v1.0.0.tar.gz.asc'
@@ -56,7 +62,7 @@
           - 'README.md'
           - '.hidden_file'
 
-    - name: 'Default | converge | assert r_pufky.srv.repo (file signature)'
+    - name: 'Default | converge | assert r_pufky.deb.repo (file signature)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -67,7 +73,7 @@
           - _repo_checksum is mapping
           - _repo_signature is mapping
         fail_msg: |
-          Exported variables are not set correctly.
+          ✘ Exported variables are not set correctly.
 
           _repo_tag: {{ _repo_tag }}
           _repo_dir: {{ _repo_dir }}
@@ -76,12 +82,15 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.srv.repo (version parsing)'
+    - name: 'Default | converge | apply r_pufky.deb.repo (version parsing)'
       ansible.builtin.include_role:
-        name: 'r_pufky.srv.repo'
+        name: 'r_pufky.deb.repo'
       vars:
         repo_release_asset: 'test_archive_{VERSION}.tar.gz'
-        repo_release_gpg_key: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/cache/466EEC2B67516C7117C85CE3A0BC35D16698BAB9.asc'
+        repo_release_gpg_key: '{{
+            lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~
+            "/molecule/cache/466EEC2B67516C7117C85CE3A0BC35D16698BAB9.asc"
+          }}'
         repo_release_gpg_key_id: ''
         repo_release_checksum: 'test_archive_{VERSION}.tar.gz.sha256'
         repo_release_signature: 'test_archive_{VERSION}.tar.gz.asc'
@@ -90,7 +99,7 @@
           - 'README.md'
           - '.hidden_file'
 
-    - name: 'Default | converge | assert r_pufky.srv.repo (version parsing)'
+    - name: 'Default | converge | assert r_pufky.deb.repo (version parsing)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -101,7 +110,7 @@
           - _repo_checksum is mapping
           - _repo_signature is mapping
         fail_msg: |
-          Exported variables are not set correctly.
+          ✘ Exported variables are not set correctly.
 
           _repo_tag: {{ _repo_tag }}
           _repo_dir: {{ _repo_dir }}
@@ -110,9 +119,9 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.srv.repo (tar.xz)'
+    - name: 'Default | converge | apply r_pufky.deb.repo (tar.xz)'
       ansible.builtin.include_role:
-        name: 'r_pufky.srv.repo'
+        name: 'r_pufky.deb.repo'
       vars:
         repo_release_asset: 'test_archive_v1.0.0.tar.xz'
         repo_extract_dir: '/opt/test_repo_xz'
@@ -120,7 +129,7 @@
           - 'README.md'
           - '.hidden_file'
 
-    - name: 'Default | converge | assert r_pufky.srv.repo (tar.xz)'
+    - name: 'Default | converge | assert r_pufky.deb.repo (tar.xz)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -131,7 +140,7 @@
           - _repo_checksum is mapping
           - _repo_signature is mapping
         fail_msg: |
-          Exported variables are not set correctly.
+          ✘ Exported variables are not set correctly.
 
           _repo_tag: {{ _repo_tag }}
           _repo_dir: {{ _repo_dir }}
@@ -140,20 +149,20 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.srv.repo (zip)'
+    - name: 'Default | converge | apply r_pufky.deb.repo (zip)'
       ansible.builtin.include_role:
-        name: 'r_pufky.srv.repo'
+        name: 'r_pufky.deb.repo'
       vars:
         repo_release_asset: 'test_archive_v1.0.0.zip'
         repo_staging_clean: false
         repo_extract_dir: '/opt/test_repo_zip'
-        repo_extract_symlink: '/opt/test_repo_zip/test_repo'  # should not affect test
+        repo_extract_symlink: '/opt/test_repo_zip/test_repo'
         repo_extract_extra_opts: ''
         repo_extract_remove_files:
           - 'README.md'
           - '.hidden_file'
 
-    - name: 'Default | converge | assert r_pufky.srv.repo (zip)'
+    - name: 'Default | converge | assert r_pufky.deb.repo (zip)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -164,7 +173,7 @@
           - _repo_checksum is mapping
           - _repo_signature is mapping
         fail_msg: |
-          Exported variables are not set correctly.
+          ✘ Exported variables are not set correctly.
 
           _repo_tag: {{ _repo_tag }}
           _repo_dir: {{ _repo_dir }}
@@ -173,9 +182,9 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.srv.repo (binary)'
+    - name: 'Default | converge | apply r_pufky.deb.repo (binary)'
       ansible.builtin.include_role:
-        name: 'r_pufky.srv.repo'
+        name: 'r_pufky.deb.repo'
       vars:
         repo_release_asset: 'test_binary_v1.0.0'
         repo_staging_clean: false
@@ -183,7 +192,7 @@
         repo_extract_binary_mode: '0755'
         repo_extract_symlink: '/opt/test_repo_binary/test_repo'
 
-    - name: 'Default | converge | assert r_pufky.srv.repo (binary)'
+    - name: 'Default | converge | assert r_pufky.deb.repo (binary)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -194,7 +203,7 @@
           - _repo_checksum is mapping
           - _repo_signature is mapping
         fail_msg: |
-          Exported variables are not set correctly.
+          ✘ Exported variables are not set correctly.
 
           _repo_tag: {{ _repo_tag }}
           _repo_dir: {{ _repo_dir }}
@@ -203,18 +212,20 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.srv.repo (static URL)'
+    - name: 'Default | converge | apply r_pufky.deb.repo (static URL)'
       ansible.builtin.include_role:
-        name: 'r_pufky.srv.repo'
+        name: 'r_pufky.deb.repo'
       vars:
         repo_release_asset: 'test_archive_v1.0.0.tar.gz'
         repo_staging_clean: false
         repo_extract_dir: '/opt/test_repo_static'
         repo_extract_symlink: '/opt/test_repo_static/test_repo'
-        repo_release_asset_static_url: 'https://example.com/alt/repo/binary.tar.gz'
+        repo_release_asset_static_url:
+          'https://example.com/alt/repo/binary.tar.gz'
 
-    - name: 'Default | converge | assert r_pufky.srv.repo (static URL)'
+    - name: 'Default | converge | assert r_pufky.deb.repo (static URL)'
       ansible.builtin.assert:
+        quiet: true
         that:
           - _repo_tag == 'v1.0.0'
           - _repo_dir == '/opt/test_repo_static/test_repo-v1.0.0'
@@ -223,7 +234,7 @@
           - _repo_checksum is mapping
           - _repo_signature is mapping
         fail_msg: |
-          Exported variables are not set correctly.
+          ✘ Exported variables are not set correctly.
 
           _repo_tag: {{ _repo_tag }}
           _repo_dir: {{ _repo_dir }}
@@ -232,9 +243,9 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.srv.repo (pre-release)'
+    - name: 'Default | converge | apply r_pufky.deb.repo (pre-release)'
       ansible.builtin.include_role:
-        name: 'r_pufky.srv.repo'
+        name: 'r_pufky.deb.repo'
       vars:
         repo_release_asset: 'test_archive_v1.0.0.tar.gz'
         repo_release_pre_enable: true
@@ -245,7 +256,7 @@
           - 'README.md'
           - '.hidden_file'
 
-    - name: 'Default | converge | assert r_pufky.srv.repo (pre-release)'
+    - name: 'Default | converge | assert r_pufky.deb.repo (pre-release)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -256,7 +267,7 @@
           - _repo_checksum is mapping
           - _repo_signature is mapping
         fail_msg: |
-          Exported variables are not set correctly.
+          ✘ Exported variables are not set correctly.
 
           _repo_tag: {{ _repo_tag }}
           _repo_dir: {{ _repo_dir }}

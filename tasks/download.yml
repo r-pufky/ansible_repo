@@ -1,9 +1,8 @@
 ---
-# yamllint disable rule:line-length
 ###############################################################################
 # Repo Download
 ###############################################################################
-# Download specificed asset to staging.
+# Download specified asset to staging.
 #
 # Args:
 #   __repo_stage_asset: dict - staged asset metadata.
@@ -28,7 +27,9 @@
 - name: 'Download | inject downloaded archive'
   when: (repo_testing_enable | default(false))
   ansible.builtin.copy:
-    src: '{{ repo_testing_versions[__repo_cache_test_index | int][__repo_stage_test] }}'
+    src: '{{
+        repo_testing_versions[__repo_cache_test_index | int][__repo_stage_test]
+      }}'
     dest: '{{ __repo_staging_dir }}/{{ __repo_stage_asset.name }}'
     owner: '{{ repo_file_owner }}'
     group: '{{ repo_file_group }}'

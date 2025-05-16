@@ -1,145 +1,159 @@
 ---
-# yamllint disable rule:line-length
-- name: 'Extract delete migration | verify | extraction successful'
+- name: 'Migration | verify | extraction successful'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Extract delete migration | verify | query repo v1.0.0'
-      ansible.builtin.stat:
-        path: '/opt/test_repo_gz/test_repo-v1.0.0'
-      register: _test_repo_delete_repo_100
+    - name: 'Migration | verify | repo v1.0.0'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'file.yml'
+      vars:
+        test_name: 'Migration | verify | repo v1.0.0'
+        test_file: '/opt/test_repo_gz/test_repo-v1.0.0'
+        test_owner: '{{ omit }}'
+        test_group: '{{ omit }}'
+        test_mode: '{{ omit }}'
+        test_state: 'absent'
 
-    - name: 'Extract delete migration | verify | assert v1.0.0 deleted'
-      ansible.builtin.assert:
-        quiet: true
-        that: not _test_repo_delete_repo_100.stat.exists
-        fail_msg: 'v1.0.0 exists. It should have been deleted.'
+    - name: 'Migration | verify | repo v1.0.1'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'file.yml'
+      vars:
+        test_name: 'Migration | verify | repo v1.0.1'
+        test_file: '/opt/test_repo_gz/test_repo-v1.0.1'
+        test_owner: 'root'
+        test_group: 'root'
+        test_mode: '0750'
+        test_state: 'directory'
 
-    - name: 'Extract delete migration | verify | query repo v1.0.1'
-      ansible.builtin.stat:
-        path: '/opt/test_repo_gz/test_repo-v1.0.1'
-      register: _test_repo_delete_repo_101
+    - name: 'Migration | verify | kept directory'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'file.yml'
+      vars:
+        test_name: 'Migration | verify | kept directory'
+        test_file: '/opt/test_repo_gz/this_dir_should_not_be_removed'
+        test_owner: 'root'
+        test_group: 'root'
+        test_mode: '0755'
+        test_state: 'directory'
 
-    - name: 'Extract delete migration | verify | assert v1.0.1 exists'
-      ansible.builtin.assert:
-        quiet: true
-        that: _test_repo_delete_repo_101.stat.exists
-        fail_msg: 'v1.0.1 removed. It should exist.'
+    - name: 'Migration | verify | kept file'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'file.yml'
+      vars:
+        test_name: 'Migration | verify | kept file'
+        test_file: '/opt/test_repo_gz/this_file_should_not_be_removed'
+        test_owner: 'root'
+        test_group: 'root'
+        test_mode: '0755'
+        test_state: 'file'
 
-    - name: 'Extract delete migration | verify | query kept directory'
-      ansible.builtin.stat:
-        path: '/opt/test_repo_gz/this_dir_should_not_be_removed'
-      register: _test_repo_delete_dir
-
-    - name: 'Extract delete migration | verify | assert non-repo dir exists'
-      ansible.builtin.assert:
-        quiet: true
-        that: _test_repo_delete_dir.stat.exists
-        fail_msg: 'non-repo directory removed. It should exist.'
-
-    - name: 'Extract delete migration | verify | query kept file'
-      ansible.builtin.stat:
-        path: '/opt/test_repo_gz/this_file_should_not_be_removed'
-      register: _test_repo_delete_file
-
-    - name: 'Extract delete migration | verify | assert non-repo file exists'
-      ansible.builtin.assert:
-        quiet: true
-        that: _test_repo_delete_file.stat.exists
-        fail_msg: 'non-repo file removed. It should exist.'
-
-- name: 'Extract delete migration | verify | migrate data'
+- name: 'Migration | verify | migrate data'
   hosts: 'repo-debian-12-migration'
   gather_facts: false
   tasks:
-    - name: 'Extract delete migration | verify | query migrated file'
+    - name: 'Migration | verify | query migrated file'
       ansible.builtin.slurp:
         path: '/opt/test_repo_gz/test_repo/config/db/db_skeleton_file.db'
       register: _test_repo_migration
 
-    - name: 'Extract delete migration | verify | assert migrated file version'
+    - name: 'Migration | verify | assert migrated file version'
       ansible.builtin.assert:
         quiet: true
         that: _test_repo_migration.content | b64decode == '1.0.0'
-        fail_msg: 'db_skeleton_file.db version 1.0.0 migration FAILED.'
+        fail_msg: '✘ db_skeleton_file.db version 1.0.0 migration FAILED.'
 
-    - name: 'Extract delete migration | verify | query nested_migration'
-      ansible.builtin.stat:
-        path: '/opt/test_repo_gz/test_repo/nested_migration'
-      register: _test_repo_nested_migration
+    - name: 'Migration | verify | nested_migration'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'file.yml'
+      vars:
+        test_name: 'Migration | verify | nested_migration'
+        test_file: '/opt/test_repo_gz/test_repo/nested_migration'
+        test_owner: 'root'
+        test_group: 'root'
+        test_mode: '0750'
+        test_state: 'directory'
 
-    - name: 'Extract delete migration | verify | assert nested_migration'
-      ansible.builtin.assert:
-        quiet: true
-        that: _test_repo_nested_migration.stat.exists
-        fail_msg: 'nested_migration migration FAILED.'
+    - name: 'Migration | verify | nested_migration/nested_migration_file'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'file.yml'
+      vars:
+        test_name:
+          'Migration | verify | nested_migration/nested_migration_file'
+        test_file:
+          '/opt/test_repo_gz/test_repo/nested_migration/nested_migration_file'
+        test_owner: 'root'
+        test_group: 'root'
+        test_mode: '0640'
+        test_state: 'file'
 
-    - name: 'Extract delete migration | verify | query nested_migration/nested_migration_file'
-      ansible.builtin.stat:
-        path: '/opt/test_repo_gz/test_repo/nested_migration/nested_migration_file'
-      register: _test_repo_nested_migration
+    - name: 'Migration | verify | nested_migration/deep'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'file.yml'
+      vars:
+        test_name: 'Migration | verify | nested_migration/deep'
+        test_file: '/opt/test_repo_gz/test_repo/nested_migration/deep'
+        test_owner: 'root'
+        test_group: 'root'
+        test_mode: '0750'
+        test_state: 'directory'
 
-    - name: 'Extract delete migration | verify | assert nested_migration/nested_migration_file'
-      ansible.builtin.assert:
-        quiet: true
-        that: _test_repo_nested_migration.stat.exists
-        fail_msg: 'nested_migration/nested_migration_file migration FAILED.'
+    - name: 'Migration | verify | nested_migration/deep/deep_file'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'file.yml'
+      vars:
+        test_name: 'Migration | verify | nested_migration/deep/deep_file'
+        test_file:
+          '/opt/test_repo_gz/test_repo/nested_migration/deep/deep_file'
+        test_owner: 'root'
+        test_group: 'root'
+        test_mode: '0640'
+        test_state: 'file'
 
-    - name: 'Extract delete migration | verify | query nested_migration/deep'
-      ansible.builtin.stat:
-        path: '/opt/test_repo_gz/test_repo/nested_migration/deep'
-      register: _test_repo_nested_migration
+    - name: 'Migration | verify | nested_migration/deep/folder'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'file.yml'
+      vars:
+        test_name: 'Migration | verify | nested_migration/deep/folder'
+        test_file: '/opt/test_repo_gz/test_repo/nested_migration/deep/folder'
+        test_owner: 'root'
+        test_group: 'root'
+        test_mode: '0750'
+        test_state: 'directory'
 
-    - name: 'Extract delete migration | verify | assert nested_migration/deep'
-      ansible.builtin.assert:
-        quiet: true
-        that: _test_repo_nested_migration.stat.exists
-        fail_msg: 'nested_migration/deep migration FAILED.'
+    - name: >
+        Migration | verify | nested_migration/deep/folder/deep_folder_file
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'file.yml'
+      vars:
+        test_name:
+          'Migration | verify | nested_migration/deep/folder/deep_folder_file'
+        test_file: '/opt/test_repo_gz/test_repo/nested_migration/deep/folder/deep_folder_file'  # yamllint disable-line rule:line-length
+        test_owner: 'root'
+        test_group: 'root'
+        test_mode: '0640'
+        test_state: 'file'
 
-    - name: 'Extract delete migration | verify | query nested_migration/deep/deep_file'
-      ansible.builtin.stat:
-        path: '/opt/test_repo_gz/test_repo/nested_migration/deep/deep_file'
-      register: _test_repo_nested_migration
-
-    - name: 'Extract delete migration | verify | assert nested_migration/deep/deep_file'
-      ansible.builtin.assert:
-        quiet: true
-        that: _test_repo_nested_migration.stat.exists
-        fail_msg: 'nested_migration/deep/deep_file migration FAILED.'
-
-    - name: 'Extract delete migration | verify | query nested_migration/deep/folder'
-      ansible.builtin.stat:
-        path: '/opt/test_repo_gz/test_repo/nested_migration/deep/folder'
-      register: _test_repo_nested_migration
-
-    - name: 'Extract delete migration | verify | assert nested_migration/deep/folder'
-      ansible.builtin.assert:
-        quiet: true
-        that: _test_repo_nested_migration.stat.exists
-        fail_msg: 'nested_migration/deep/folder migration FAILED.'
-
-    - name: 'Extract delete migration | verify | query nested_migration/deep/folder/deep_folder_file'
-      ansible.builtin.stat:
-        path: '/opt/test_repo_gz/test_repo/nested_migration/deep/folder/deep_folder_file'
-      register: _test_repo_nested_migration
-
-    - name: 'Extract delete migration | verify | assert nested_migration/deep/folder/deep_folder_file'
-      ansible.builtin.assert:
-        quiet: true
-        that: _test_repo_nested_migration.stat.exists
-        fail_msg: 'nested_migration/deep/folder/deep_folder_file migration FAILED.'
-
-- name: 'Extract delete migration | verify | no migration'
+- name: 'Migration | verify | no migration'
   hosts: 'repo-debian-12-migration-no-keep'
   gather_facts: false
   tasks:
-    - name: 'Extract delete migration | verify | query migrated file'
+    - name: 'Migration | verify | query migrated file'
       ansible.builtin.slurp:
         path: '/opt/test_repo_gz/test_repo/config/db/db_skeleton_file.db'
       register: _test_repo_migration
 
-    - name: 'Extract delete migration | verify | assert migrated file version'
+    - name: 'Migration | verify | assert migrated file version'
       ansible.builtin.assert:
         quiet: true
         that: _test_repo_migration.content | b64decode == '1.0.1'
-        fail_msg: 'db_skeleton_file.db should be version 1.0.1.'
+        fail_msg: '✘ db_skeleton_file.db should be version 1.0.1.'

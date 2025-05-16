@@ -1,5 +1,4 @@
 ---
-# yamllint disable rule:line-length
 ###############################################################################
 # Stage Github Assets
 ###############################################################################
@@ -24,10 +23,10 @@
     mode: '0755'
     state: 'directory'
 
-- name: 'Stage | download in progress (may take a while)'
+- name: 'Stage | download in progress 🗘'
   ansible.builtin.debug:
     msg: |
-      Assets are being downloaded. This may take a few minutes.
+      🗘 Assets are being downloaded. This may take a few minutes.
 
 - name: 'Stage | download asset'
   when: not __repo_asset_stat.stat.exists

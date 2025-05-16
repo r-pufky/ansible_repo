@@ -1,5 +1,4 @@
 ---
-# yamllint disable rule:line-length
 - name: 'Default | prepare'
   hosts: 127.0.0.1
   connection: local
@@ -7,8 +6,10 @@
   tasks:
     - name: 'Default | prepare | generate cache location'
       ansible.builtin.set_fact:
-        _test_cache: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/cache'
-        _test_files: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files'
+        _test_cache:
+          '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/cache'
+        _test_files:
+          '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files'
 
     - name: 'Default | prepare | create cache'
       ansible.builtin.file:
@@ -24,7 +25,7 @@
     - name: 'Default | prepare | export testing key file'
       when: not _test_prepare.stat.exists
       ansible.builtin.get_url:
-        url: 'https://keys.openpgp.org/vks/v1/by-fingerprint/466EEC2B67516C7117C85CE3A0BC35D16698BAB9'
+        url: 'https://keys.openpgp.org/vks/v1/by-fingerprint/466EEC2B67516C7117C85CE3A0BC35D16698BAB9'  # yamllint disable-line rule:line-length
         dest: '{{ _test_cache }}/466EEC2B67516C7117C85CE3A0BC35D16698BAB9.asc'
         mode: '0640'
 
@@ -35,7 +36,10 @@
 
     - name: 'Default | prepare | generate test_archive_v1.0.0.tar.gz.sha256'
       when: not _test_prepare.stat.exists
-      ansible.builtin.shell: 'set -o pipefail && sha256sum "test_archive_v1.0.0.tar.gz" > "{{ _test_cache }}/test_archive_v1.0.0.tar.gz.sha256"'
+      ansible.builtin.shell: >
+        set -o pipefail &&
+        sha256sum 'test_archive_v1.0.0.tar.gz' >
+        '{{ _test_cache }}/test_archive_v1.0.0.tar.gz.sha256'
       args:
         chdir: '{{ _test_files }}'
       changed_when: true
@@ -47,7 +51,10 @@
 
     - name: 'Default | prepare | generate test_archive_v1.0.0.tar.xz.sha256'
       when: not _test_prepare.stat.exists
-      ansible.builtin.shell: 'set -o pipefail && sha256sum "test_archive_v1.0.0.tar.xz" > "{{ _test_cache }}/test_archive_v1.0.0.tar.xz.sha256"'
+      ansible.builtin.shell: >
+        set -o pipefail &&
+        sha256sum 'test_archive_v1.0.0.tar.xz' >
+        '{{ _test_cache }}/test_archive_v1.0.0.tar.xz.sha256'
       args:
         chdir: '{{ _test_files }}'
       changed_when: true
@@ -59,7 +66,10 @@
 
     - name: 'Default | prepare | generate test_archive_v1.0.0.zip.sha256'
       when: not _test_prepare.stat.exists
-      ansible.builtin.shell: 'set -o pipefail && sha256sum "test_archive_v1.0.0.zip" > "{{ _test_cache }}/test_archive_v1.0.0.zip.sha256"'
+      ansible.builtin.shell: >
+        set -o pipefail &&
+        sha256sum 'test_archive_v1.0.0.zip' >
+        '{{ _test_cache }}/test_archive_v1.0.0.zip.sha256'
       args:
         chdir: '{{ _test_files }}'
       changed_when: true

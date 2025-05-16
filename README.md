@@ -4,8 +4,6 @@ Easily download, verify, extract, and stage releases from remote repositories.
 ## Requirements
 [supported platforms](https://github.com/r-pufky/ansible_repo/blob/main/meta/main.yml)
 
-[collections/roles](https://github.com/r-pufky/ansible_repo/blob/main/meta/requirements.yml)
-
 ## Role Variables
 [defaults](https://github.com/r-pufky/ansible_repo/tree/main/defaults/main/)
 
@@ -25,8 +23,8 @@ scope):
  _repo_tag             | str  | Detected tag version.
 
 ## Dependencies
-Part of the [r_pufky.srv](https://github.com/r-pufky/ansible_collection_srv)
-collection.
+**galaxy-ng** roles cannot be used independently. Part of
+[r_pufky.deb](https://github.com/r-pufky/ansible_collection_deb) collection.
 
 ## Example Playbook
 This role is intended to be called multiple times in other roles with most
@@ -37,7 +35,7 @@ roles/my_custom_role/tasks/task.yml
 ``` yaml
 - name: 'download and extract latest release (from github)'
   ansible.builtin.include_role:
-    name: 'r_pufky.srv.repo'
+    name: 'r_pufky.deb.repo'
   vars:
     repo_host_access_token: '{ACCESS TOKEN FROM GITHUB}'
     repo_release_owner: 'sct'
@@ -61,7 +59,7 @@ roles/my_custom_role/tasks/task.yml
 ``` yaml
 - name: 'download binary release (from codeberg)'
   ansible.builtin.include_role:
-    name: 'r_pufky.srv.repo'
+    name: 'r_pufky.deb.repo'
   vars:
     repo_host: 'codeberg'
     repo_host_access_token: '{ACCESS TOKEN FROM CODEBERG}'
@@ -77,7 +75,7 @@ roles/my_custom_role/tasks/task.yml
 ```
 
 ## Development
-Configure [environment](https://github.com/r-pufky/ansible_collection_srv/blob/main/docs/dev/environment/README.md)
+Configure [environment](https://github.com/r-pufky/ansible_collection_docs/blob/main/dev/environment/README.md)
 
 Run all unit tests:
 ``` bash

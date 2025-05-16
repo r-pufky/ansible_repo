@@ -1,7 +1,8 @@
 ---
 galaxy_info:
+  role_name: 'repo'
   author: 'r_pufky'
-  description: 'Github release download manager.'
+  description: 'Release download manager.'
   company: 'N/A'
   license: 'AGPL-3.0 License'
   min_ansible_version: '2.18.0'

@@ -1,5 +1,4 @@
 ---
-# yamllint disable rule:line-length
 - name: 'Live API test | verify | live API extraction successful'
   hosts: 'all'
   gather_facts: false
@@ -17,35 +16,32 @@
             recurse: false
           register: _test_github_extracted_archives
 
-        - name: 'Live API test | verify | github | archive extracted successfully'
+        - name: >
+            Live API test | verify | github |
+            archive extracted successfully
           ansible.builtin.assert:
             quiet: true
             that: _test_github_extracted_archives.files | length == 1
-            fail_msg: '0 or multiple repo directories found. Should be 1.'
+            fail_msg: '✘ 0 or multiple repo directories found. Should be 1.'
 
-        - name: 'Live API test | verify | github | README.md file removed'
-          ansible.builtin.stat:
-            path: '{{ _test_github_extracted_archives.files[0].path }}/README.md'
-          register: _test_github_live_removed_readme
-
-        - name: 'Live API test | verify | github | UPGRADING file removed'
-          ansible.builtin.stat:
-            path: '{{ _test_github_extracted_archives.files[0].path }}/UPGRADING'
-          register: _test_github_live_removed_upgrading
-
-        - name: 'Live API test | verify | github | config.inc.php.sample file removed'
-          ansible.builtin.stat:
-            path: '{{ _test_github_extracted_archives.files[0].path }}/config.inc.php.sample'
-          register: _test_github_live_removed_config
-
-        - name: 'Live API test | verify | github | expected files removed'
-          ansible.builtin.assert:
-            quiet: true
-            that:
-              - not _test_github_live_removed_readme.stat.exists
-              - not _test_github_live_removed_upgrading.stat.exists
-              - not _test_github_live_removed_config.stat.exists
-            fail_msg: 'files have not been removed.'
+        - name: 'Live API test | verify | github | {{ item }}'
+          ansible.builtin.include_role:
+            name: 'r_pufky.lib.tests'
+            tasks_from: 'file.yml'
+          vars:
+            test_name: 'Live API test | verify | github | {{ item }}'
+            test_file: '{{ item }}'
+            test_owner: '{{ omit }}'
+            test_group: '{{ omit }}'
+            test_mode: '{{ omit }}'
+            test_state: 'absent'
+          loop:
+            - '{{ _test_github_extracted_archives.files[0].path }}/README.md'
+            - '{{ _test_github_extracted_archives.files[0].path }}/UPGRADING'
+            - '{{
+                  _test_github_extracted_archives.files[0].path ~
+                  "/config.inc.php.sample"
+              }}'
 
     - name: 'Live API test | verify | codeberg'
       when: (repo_live_api_codeberg_enable | default(false))
@@ -60,8 +56,10 @@
             recurse: false
           register: _test_codeberg_extracted_archives
 
-        - name: 'Live API test | verify | codeberg | archive extracted successfully'
+        - name: >
+            Live API test | verify | codeberg |
+            archive extracted successfully
           ansible.builtin.assert:
             quiet: true
             that: _test_codeberg_extracted_archives.files | length == 1
-            fail_msg: '0 or multiple repo directories found. Should be 1.'
+            fail_msg: '✘ 0 or multiple repo directories found. Should be 1.'

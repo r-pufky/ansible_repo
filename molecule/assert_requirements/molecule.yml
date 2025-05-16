@@ -1,7 +1,13 @@
 ---
-# yamllint disable rule:line-length
-# Confirm:
+###############################################################################
+# Assert Requirements
+###############################################################################
+# Validate assertion logic. Assertions must be tested in converge as failure
+# testing will cause role to fail.
+#
+# Tests:
 # * Test all assertions are triggered correctly.
+
 dependency:
   name: 'galaxy'
 driver:

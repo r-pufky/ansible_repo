@@ -1,5 +1,8 @@
 ---
 # yamllint disable rule:line-length
+###############################################################################
+# Live API Test
+###############################################################################
 # Integration test against a live repository for download and extraction. This
 # confirms the API endpoints are processed correctly and should only be run as
 # one-off test before releasing.
@@ -16,6 +19,9 @@
 #
 #   repo_live_api_github_enable
 #   repo_live_api_codeberg_enable
+#
+# yamllint enable rule:line-length
+
 dependency:
   name: 'galaxy'
 driver:

@@ -1,5 +1,4 @@
 ---
-# yamllint disable rule:line-length
 ###############################################################################
 # Unpack Github Archive
 ###############################################################################
@@ -75,8 +74,10 @@
 - name: 'Extract | symlink'
   when: repo_extract_symlink
   block:
-    - name: 'Extract | symlink {{ repo_extract_symlink }} -> {{ _repo_dir }}/{{ _repo_asset.name }}'  # noqa name[template] provide full symlink info
-      when: >
+    - name: >
+        Extract | symlink
+        {{ repo_extract_symlink }} -> {{ _repo_dir }}/{{ _repo_asset.name }}
+      when: >  # noqa name[template] provide full symlink info
         '.tar.' not in _repo_asset.name and
         '.zip' not in _repo_asset.name
       ansible.builtin.file:
@@ -87,8 +88,8 @@
         force: true
         state: 'link'
 
-    - name: 'Extract | symlink {{ repo_extract_symlink }} -> {{ _repo_dir }}'  # noqa name[template] provide full symlink info
-      when: >
+    - name: 'Extract | symlink {{ repo_extract_symlink }} -> {{ _repo_dir }}'
+      when: >  # noqa name[template] provide full symlink info
         '.tar.' in _repo_asset.name or
         '.zip' in _repo_asset.name
       ansible.builtin.file:
@@ -113,7 +114,9 @@
       register: __repo_install_stat
 
     - name: 'Extract | delete old versions'
-      when: _repo_tag != item.path | basename | regex_replace(repo_release_repo ~ '-', '')
+      when: >
+        _repo_tag != item.path | basename |
+        regex_replace(repo_release_repo ~ '-', '')
       ansible.builtin.file:
         path: '{{ item.path }}'
         state: 'absent'

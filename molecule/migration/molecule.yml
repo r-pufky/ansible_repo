@@ -1,8 +1,13 @@
 ---
-# yamllint disable rule:line-length
-# Confirm:
+###############################################################################
+# Migration
+###############################################################################
+# Ensure files are migrated correctly.
+#
+# Tests:
 # * Releases are installed and migrated to the new version.
 # * Migrated files are kept to v1.0.0.
+
 dependency:
   name: 'galaxy'
 driver:
@@ -30,11 +35,20 @@ provisioner:
         repo_testing_enable: true
         repo_testing_versions:
           - version: 'v1.0.0'
-            asset: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.0.tar.gz'
+            asset: '{{
+                lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~
+                "/molecule/files/test_archive_v1.0.0.tar.gz"
+              }}'
           - version: 'v1.0.1'
-            asset: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.1.tar.gz'
+            asset: '{{
+                lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~
+                "/molecule/files/test_archive_v1.0.1.tar.gz"
+              }}'
           - version: 'v1.0.1'
-            asset: '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files/test_archive_v1.0.1.tar.gz'
+            asset: '{{
+                lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~
+                "/molecule/files/test_archive_v1.0.1.tar.gz"
+              }}'
 platforms:
   - name: 'repo-debian-12-migration'
     image: 'ghcr.io/hifis-net/debian-systemd:12'
