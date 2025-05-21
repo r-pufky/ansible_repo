@@ -1,0 +1,73 @@
+---
+###############################################################################
+# Source Only
+###############################################################################
+# Validate that source only releases (tar/zip balls only, no asset artifacts)
+# are properly downloaded when enabled.
+#
+# https://github.com/agl/jbig2enc is an example repository of this case.
+#
+# Tests:
+# * Enabling source downloads works for both tar and zip cases.
+
+dependency:
+  name: 'galaxy'
+driver:
+  name: 'podman'
+provisioner:
+  name: 'ansible'
+  config_options:
+    defaults:
+      interpreter_python: 'auto_silent'
+      callback_whitelist: 'profile_tasks, timer, yaml'
+    ssh_connection:
+      pipelining: false
+  inventory:
+    group_vars:
+      all:
+        repo_release_download_source_enable: true
+        repo_staging_clean: false
+        repo_release_owner: 'test_owner'
+        repo_release_repo: 'test_repo'
+        repo_testing_enable: true
+        repo_testing_versions:
+          - comment: 'tar.gz source'
+            version: 'v1.0.0'
+            asset: '{{
+                lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~
+                "/molecule/files/test_archive_v1.0.0.tar.gz"
+              }}'
+          - comment: 'zip source'
+            version: 'v1.0.0'
+            asset: '{{
+                lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~
+                "/molecule/files/test_archive_v1.0.0.zip"
+              }}'
+platforms:
+  - name: 'repo-debian-12-source_only'
+    image: 'ghcr.io/hifis-net/debian-systemd:12'
+    systemd: 'always'
+    volumes:
+      - '/sys/fs/cgroup:/sys/fs/cgroup:ro'
+    command: '/lib/systemd/systemd'
+    pre_build_image: true
+verifier:
+  name: 'ansible'
+lint: |
+  set -e
+  yamllint .
+  ansible-lint .
+scenario:
+  test_sequence:
+    # - 'dependency'
+    # - 'cleanup'
+    - 'destroy'
+    - 'syntax'
+    - 'create'
+    - 'prepare'
+    - 'converge'
+    # - 'idempotence'  # Files created, extracted, created, deleted.
+    # - 'side_effect'
+    - 'verify'
+    # - 'cleanup'
+    - 'destroy'

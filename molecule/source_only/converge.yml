@@ -1,0 +1,75 @@
+---
+###############################################################################
+# Converge
+###############################################################################
+# Role variable returned variables are scoped to the current play only (e.g.
+# converge.yml) and must be tested between each application of the role. Test
+# these values while converging versus verify.yml (where scoping will prevent)
+# testing these values.
+#
+# Roles consuming this role do not need to test this way.
+
+- name: 'Default | converge'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Default | converge | apply r_pufky.deb.repo (tar.gz)'
+      ansible.builtin.include_role:
+        name: 'r_pufky.deb.repo'
+      vars:
+        repo_release_asset: 'test_archive_v1.0.0.tar.gz'
+        repo_extract_dir: '/opt/test_repo_gz'
+        repo_extract_remove_files:
+          - 'README.md'
+          - '.hidden_file'
+
+    - name: 'Default | converge | assert r_pufky.deb.repo (tar.gz)'
+      ansible.builtin.assert:
+        quiet: true
+        that:
+          - _repo_tag == 'v1.0.0'
+          - _repo_dir == '/opt/test_repo_gz/test_repo-v1.0.0'
+          - _repo_remote_metadata is mapping
+          - _repo_asset is mapping
+          - _repo_checksum is mapping
+          - _repo_signature is mapping
+        fail_msg: |
+          ✘ Exported variables are not set correctly.
+
+          _repo_tag: {{ _repo_tag }}
+          _repo_dir: {{ _repo_dir }}
+          _repo_remote_metadata: {{ _repo_remote_metadata }}
+          _repo_asset: {{ _repo_asset }}
+          _repo_checksum: {{ _repo_checksum }}
+          _repo_signature: {{ _repo_signature }}
+
+    - name: 'Default | converge | apply r_pufky.deb.repo (zip)'
+      ansible.builtin.include_role:
+        name: 'r_pufky.deb.repo'
+      vars:
+        repo_release_asset: 'test_archive_v1.0.0.zip'
+        repo_extract_dir: '/opt/test_repo_zip'
+        repo_extract_extra_opts: ''
+        repo_extract_remove_files:
+          - 'README.md'
+          - '.hidden_file'
+
+    - name: 'Default | converge | assert r_pufky.deb.repo (zip)'
+      ansible.builtin.assert:
+        quiet: true
+        that:
+          - _repo_tag == 'v1.0.0'
+          - _repo_dir == '/opt/test_repo_zip/test_repo-v1.0.0'
+          - _repo_remote_metadata is mapping
+          - _repo_asset is mapping
+          - _repo_checksum is mapping
+          - _repo_signature is mapping
+        fail_msg: |
+          ✘ Exported variables are not set correctly.
+
+          _repo_tag: {{ _repo_tag }}
+          _repo_dir: {{ _repo_dir }}
+          _repo_remote_metadata: {{ _repo_remote_metadata }}
+          _repo_asset: {{ _repo_asset }}
+          _repo_checksum: {{ _repo_checksum }}
+          _repo_signature: {{ _repo_signature }}

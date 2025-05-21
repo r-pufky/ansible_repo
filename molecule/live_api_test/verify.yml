@@ -43,6 +43,28 @@
                   "/config.inc.php.sample"
               }}'
 
+    - name: 'Live API test | verify | JBIG2enc source'
+      when: (repo_live_api_github_enable | default(false))
+      block:
+        - name:
+            'Live API test | verify | JBIG2enc source | find extracted archive'
+          ansible.builtin.find:
+            paths: '/opt/jbig2enc'
+            file_type: 'directory'
+            use_regex: true
+            patterns:
+              - '.*jbig2enc-.*'  # version will change with 'latest'
+            recurse: false
+          register: _test_github_source
+
+        - name: >
+            Live API test | verify | JBIG2enc source |
+            archive extracted successfully
+          ansible.builtin.assert:
+            quiet: true
+            that: _test_github_source.files | length == 1
+            fail_msg: '✘ 0 or multiple repo directories found. Should be 1.'
+
     - name: 'Live API test | verify | codeberg'
       when: (repo_live_api_codeberg_enable | default(false))
       block:

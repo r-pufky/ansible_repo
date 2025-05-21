@@ -1,0 +1,22 @@
+---
+- name: 'Default | verify | extraction successful'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Default | verify | test extraction'
+      ansible.builtin.include_tasks: 'tests/extraction.yml'
+      loop:
+        - asset: '/tmp/test_repo-v1.0.0.tar.gz'
+          path: '/opt/test_repo_gz/test_repo-v1.0.0'
+          opts: true
+          clean: true
+          binary: false
+          symlink: ''
+        - asset: '/tmp/test_archive_v1.0.0.zip'
+          path: '/opt/test_repo_zip/test_repo-v1.0.0'
+          opts: false
+          clean: false
+          binary: false
+          symlink: ''
+      loop_control:
+        label: '{{ item.asset }}'

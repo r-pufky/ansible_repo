@@ -17,6 +17,21 @@
           - 'UPGRADING'
           - 'config/config.inc.php.sample'
 
+    - name:
+        'Live API test | converge | apply r_pufky.deb.repo (JBIG2enc source)'
+      ansible.builtin.include_role:
+        name: 'r_pufky.deb.repo'
+      vars:
+        repo_release_download_source_enable: true
+        repo_release_owner: 'agl'
+        repo_release_repo: 'jbig2enc'
+        repo_release_tag: '0.30'
+        repo_release_asset: '{VERSION}.tar.gz'
+        repo_extract_dir: '/opt/jbig2enc'
+        repo_extract_symlink: '/opt/jbig2enc/jbig2enc'
+        repo_extract_mode: 'a-st,o-rwx'
+        repo_extract_extra_opts: '--strip-components=1'
+
     - name: 'Live API test | converge | apply r_pufky.deb.repo (codeberg)'
       when: (repo_live_api_codeberg_enable | default(false))
       ansible.builtin.include_role:

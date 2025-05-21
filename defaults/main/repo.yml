@@ -190,6 +190,16 @@ repo_release_gpg_key_id: ''
 # Default: '' (disabled).
 repo_release_gpg_key: ''
 
+# Download source archive instead of asset?
+#
+# Repositories which release only source code and do NOT attach asset artifacts
+# will have tarball/zipball URL's but no assets. Enabling this will download
+# specified assets from that location instead of looking up the asset to
+# download in the assets list.
+#
+# Default: False (disabled).
+repo_release_download_source_enable: false
+
 # Asset release static URL.
 #
 # Requires:

@@ -146,7 +146,9 @@
                 }}",
               "browser_download_url": "http://example.com/test.asc",
             },
-          ]
+          ],
+          "tarball_url": "http://example.com/test",
+          "zipball_url": "http://example.com/test",
         }
 
 - name: 'Prep | parse release tags'
@@ -181,9 +183,40 @@
     _repo_dir:
       '{{ __repo_extract_dir }}/{{ repo_release_repo }}-{{ _repo_tag }}'
 
+# For releases with no asset artifacts (source only), inject same structure
+# template into API results for static tar/zip URL's; enabling source code
+# downloads with no changes for download steps.
+- name: 'Prep | parse source releases'
+  ansible.builtin.set_fact:
+    __repo_source_dict: {
+      "name": "{{ __repo_release_asset }}",
+      "browser_download_url": "{{
+        _repo_remote_metadata.zipball_url
+        if '.zip' in __repo_release_asset else
+        _repo_remote_metadata.tarball_url
+      }}",
+    }
+
+- name: 'Prep | check returned assets'
+  when: >
+    not repo_release_download_source_enable and
+    __repo_release_asset not in __repo_asset_dict
+  ansible.builtin.fail:
+    msg: |
+      ✘ repo_release_asset was not found in returned asset list.
+
+      Did you want to download source with repo_release_download_source_enable?
+
+      repo_release_asset: {{ __repo_release_asset }}
+      assets returned: {{ __repo_asset_dict }}
+
 - name: 'Prep | parse asset metadata'
   ansible.builtin.set_fact:
-    _repo_asset: '{{ __repo_asset_dict[__repo_release_asset] }}'
+    _repo_asset: '{{
+        __repo_asset_dict[__repo_release_asset]
+        if not repo_release_download_source_enable else
+        __repo_source_dict
+      }}'
     _repo_checksum:
       '{{  __repo_asset_dict[__repo_release_checksum] | default({}) }}'
     _repo_signature:
