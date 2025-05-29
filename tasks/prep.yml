@@ -166,6 +166,12 @@
              zip(_repo_remote_metadata.assets))
       }}'
 
+- name: 'Prep | latest → {{ _repo_tag }}'
+  when: repo_release_tag == 'latest'
+  ansible.builtin.debug:
+    msg: |
+      ⚠ latest version: {{ _repo_tag }}
+
 - name: 'Prep | parse templates'
   ansible.builtin.set_fact:
     __repo_release_asset: '{{
