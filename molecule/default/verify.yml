@@ -1,9 +1,9 @@
 ---
-- name: 'Default | verify | extraction successful'
+- name: 'Verify | extraction successful'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Default | verify | test extraction'
+    - name: 'Verify | test extraction'
       ansible.builtin.include_tasks: 'tests/extraction.yml'
       loop:
         - asset: '/tmp/test_repo-v1.0.0.tar.gz'

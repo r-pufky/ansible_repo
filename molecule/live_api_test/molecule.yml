@@ -60,7 +60,7 @@ scenario:
     - 'destroy'
     - 'syntax'
     - 'create'
-    - 'prepare'
+    # - 'prepare'
     - 'converge'
     # - 'idempotence'  # Files created, extracted, created, deleted.
     # - 'side_effect'

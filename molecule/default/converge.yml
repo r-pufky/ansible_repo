@@ -9,11 +9,11 @@
 #
 # Roles consuming this role do not need to test this way.
 
-- name: 'Default | converge'
+- name: 'Converge'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Default | converge | apply r_pufky.deb.repo (tar.gz)'
+    - name: 'Converge | apply r_pufky.deb.repo (tar.gz)'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
       vars:
@@ -25,7 +25,7 @@
           - 'README.md'
           - '.hidden_file'
 
-    - name: 'Default | converge | assert r_pufky.deb.repo (tar.gz)'
+    - name: 'Converge | assert r_pufky.deb.repo (tar.gz)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -45,7 +45,7 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.deb.repo (file signature)'
+    - name: 'Converge | apply r_pufky.deb.repo (file signature)'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
       vars:
@@ -62,7 +62,7 @@
           - 'README.md'
           - '.hidden_file'
 
-    - name: 'Default | converge | assert r_pufky.deb.repo (file signature)'
+    - name: 'Converge | assert r_pufky.deb.repo (file signature)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -82,7 +82,7 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.deb.repo (version parsing)'
+    - name: 'Converge | apply r_pufky.deb.repo (version parsing)'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
       vars:
@@ -99,7 +99,7 @@
           - 'README.md'
           - '.hidden_file'
 
-    - name: 'Default | converge | assert r_pufky.deb.repo (version parsing)'
+    - name: 'Converge | assert r_pufky.deb.repo (version parsing)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -119,7 +119,7 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.deb.repo (tar.xz)'
+    - name: 'Converge | apply r_pufky.deb.repo (tar.xz)'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
       vars:
@@ -129,7 +129,7 @@
           - 'README.md'
           - '.hidden_file'
 
-    - name: 'Default | converge | assert r_pufky.deb.repo (tar.xz)'
+    - name: 'Converge | assert r_pufky.deb.repo (tar.xz)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -149,7 +149,7 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.deb.repo (zip)'
+    - name: 'Converge | apply r_pufky.deb.repo (zip)'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
       vars:
@@ -162,7 +162,7 @@
           - 'README.md'
           - '.hidden_file'
 
-    - name: 'Default | converge | assert r_pufky.deb.repo (zip)'
+    - name: 'Converge | assert r_pufky.deb.repo (zip)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -182,7 +182,7 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.deb.repo (binary)'
+    - name: 'Converge | apply r_pufky.deb.repo (binary)'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
       vars:
@@ -192,7 +192,7 @@
         repo_extract_binary_mode: '0755'
         repo_extract_symlink: '/opt/test_repo_binary/test_repo'
 
-    - name: 'Default | converge | assert r_pufky.deb.repo (binary)'
+    - name: 'Converge | assert r_pufky.deb.repo (binary)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -212,7 +212,7 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.deb.repo (static URL)'
+    - name: 'Converge | apply r_pufky.deb.repo (static URL)'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
       vars:
@@ -223,7 +223,7 @@
         repo_release_asset_static_url:
           'https://example.com/alt/repo/binary.tar.gz'
 
-    - name: 'Default | converge | assert r_pufky.deb.repo (static URL)'
+    - name: 'Converge | assert r_pufky.deb.repo (static URL)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -243,7 +243,7 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.deb.repo (pre-release)'
+    - name: 'Converge | apply r_pufky.deb.repo (pre-release)'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
       vars:
@@ -256,7 +256,7 @@
           - 'README.md'
           - '.hidden_file'
 
-    - name: 'Default | converge | assert r_pufky.deb.repo (pre-release)'
+    - name: 'Converge | assert r_pufky.deb.repo (pre-release)'
       ansible.builtin.assert:
         quiet: true
         that:

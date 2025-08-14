@@ -154,6 +154,8 @@
 - name: 'Prep | parse release tags'
   ansible.builtin.set_fact:
     _repo_tag: '{{ _repo_remote_metadata.tag_name }}'
+    _repo_tag_space:
+      '{{ (33 - (_repo_remote_metadata.tag_name | length)) * " " }}'
     __repo_tag_bare: '{{
         _repo_remote_metadata.tag_name
         if repo_release_specifier == "" else
@@ -170,7 +172,11 @@
   when: repo_release_tag == 'latest'
   ansible.builtin.debug:
     msg: |
-      ⚠ latest version: {{ _repo_tag }}
+      ╭───────────────────────────────────────────────────────────────────╮
+      │                                                                   │
+      │                 latest version: {{ _repo_tag ~ _repo_tag_space }} │
+      │                                                                   │
+      ╰───────────────────────────────────────────────────────────────────╯
 
 - name: 'Prep | parse templates'
   ansible.builtin.set_fact:

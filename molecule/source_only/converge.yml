@@ -9,11 +9,11 @@
 #
 # Roles consuming this role do not need to test this way.
 
-- name: 'Default | converge'
+- name: 'Converge'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Default | converge | apply r_pufky.deb.repo (tar.gz)'
+    - name: 'Converge | apply r_pufky.deb.repo (tar.gz)'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
       vars:
@@ -23,7 +23,7 @@
           - 'README.md'
           - '.hidden_file'
 
-    - name: 'Default | converge | assert r_pufky.deb.repo (tar.gz)'
+    - name: 'Converge | assert r_pufky.deb.repo (tar.gz)'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -43,7 +43,7 @@
           _repo_checksum: {{ _repo_checksum }}
           _repo_signature: {{ _repo_signature }}
 
-    - name: 'Default | converge | apply r_pufky.deb.repo (zip)'
+    - name: 'Converge | apply r_pufky.deb.repo (zip)'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
       vars:
@@ -54,7 +54,7 @@
           - 'README.md'
           - '.hidden_file'
 
-    - name: 'Default | converge | assert r_pufky.deb.repo (zip)'
+    - name: 'Converge | assert r_pufky.deb.repo (zip)'
       ansible.builtin.assert:
         quiet: true
         that:

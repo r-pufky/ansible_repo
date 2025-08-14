@@ -1,158 +1,166 @@
 ---
-- name: 'Migration | verify | extraction successful'
+- name: 'Verify | extraction successful'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Migration | verify | repo v1.0.0'
+    - name: 'Verify | repo v1.0.0'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'file.yml'
       vars:
-        test_name: 'Migration | verify | repo v1.0.0'
+        test_name: 'Verify | repo v1.0.0'
         test_file: '/opt/test_repo_gz/test_repo-v1.0.0'
         test_owner: '{{ omit }}'
         test_group: '{{ omit }}'
         test_mode: '{{ omit }}'
         test_state: 'absent'
+        test_diff: true
 
-    - name: 'Migration | verify | repo v1.0.1'
+    - name: 'Verify | repo v1.0.1'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'file.yml'
       vars:
-        test_name: 'Migration | verify | repo v1.0.1'
+        test_name: 'Verify | repo v1.0.1'
         test_file: '/opt/test_repo_gz/test_repo-v1.0.1'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0750'
         test_state: 'directory'
+        test_diff: true
 
-    - name: 'Migration | verify | kept directory'
+    - name: 'Verify | kept directory'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'file.yml'
       vars:
-        test_name: 'Migration | verify | kept directory'
+        test_name: 'Verify | kept directory'
         test_file: '/opt/test_repo_gz/this_dir_should_not_be_removed'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0755'
         test_state: 'directory'
+        test_diff: true
 
-    - name: 'Migration | verify | kept file'
+    - name: 'Verify | kept file'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'file.yml'
       vars:
-        test_name: 'Migration | verify | kept file'
+        test_name: 'Verify | kept file'
         test_file: '/opt/test_repo_gz/this_file_should_not_be_removed'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0755'
         test_state: 'file'
+        test_diff: true
 
-- name: 'Migration | verify | migrate data'
+- name: 'Verify | migrate data'
   hosts: 'repo-debian-12-migration'
   gather_facts: false
   tasks:
-    - name: 'Migration | verify | query migrated file'
+    - name: 'Verify | query migrated file'
       ansible.builtin.slurp:
         path: '/opt/test_repo_gz/test_repo/config/db/db_skeleton_file.db'
       register: _test_repo_migration
 
-    - name: 'Migration | verify | assert migrated file version'
+    - name: 'Verify | assert migrated file version'
       ansible.builtin.assert:
         quiet: true
         that: _test_repo_migration.content | b64decode == '1.0.0'
         fail_msg: '✘ db_skeleton_file.db version 1.0.0 migration FAILED.'
 
-    - name: 'Migration | verify | nested_migration'
+    - name: 'Verify | nested_migration'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'file.yml'
       vars:
-        test_name: 'Migration | verify | nested_migration'
+        test_name: 'Verify | nested_migration'
         test_file: '/opt/test_repo_gz/test_repo/nested_migration'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0750'
         test_state: 'directory'
+        test_diff: true
 
-    - name: 'Migration | verify | nested_migration/nested_migration_file'
+    - name: 'Verify | nested_migration/nested_migration_file'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'file.yml'
       vars:
-        test_name:
-          'Migration | verify | nested_migration/nested_migration_file'
+        test_name: 'Verify | nested_migration/nested_migration_file'
         test_file:
           '/opt/test_repo_gz/test_repo/nested_migration/nested_migration_file'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0640'
         test_state: 'file'
+        test_diff: true
 
-    - name: 'Migration | verify | nested_migration/deep'
+    - name: 'Verify | nested_migration/deep'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'file.yml'
       vars:
-        test_name: 'Migration | verify | nested_migration/deep'
+        test_name: 'Verify | nested_migration/deep'
         test_file: '/opt/test_repo_gz/test_repo/nested_migration/deep'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0750'
         test_state: 'directory'
+        test_diff: true
 
-    - name: 'Migration | verify | nested_migration/deep/deep_file'
+    - name: 'Verify | nested_migration/deep/deep_file'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'file.yml'
       vars:
-        test_name: 'Migration | verify | nested_migration/deep/deep_file'
+        test_name: 'Verify | nested_migration/deep/deep_file'
         test_file:
           '/opt/test_repo_gz/test_repo/nested_migration/deep/deep_file'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0640'
         test_state: 'file'
+        test_diff: true
 
-    - name: 'Migration | verify | nested_migration/deep/folder'
+    - name: 'Verify | nested_migration/deep/folder'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'file.yml'
       vars:
-        test_name: 'Migration | verify | nested_migration/deep/folder'
+        test_name: 'Verify | nested_migration/deep/folder'
         test_file: '/opt/test_repo_gz/test_repo/nested_migration/deep/folder'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0750'
         test_state: 'directory'
+        test_diff: true
 
     - name: >
-        Migration | verify | nested_migration/deep/folder/deep_folder_file
+        Verify | nested_migration/deep/folder/deep_folder_file
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'file.yml'
       vars:
-        test_name:
-          'Migration | verify | nested_migration/deep/folder/deep_folder_file'
+        test_name: 'Verify | nested_migration/deep/folder/deep_folder_file'
         test_file: '/opt/test_repo_gz/test_repo/nested_migration/deep/folder/deep_folder_file'  # yamllint disable-line rule:line-length
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0640'
         test_state: 'file'
+        test_diff: true
 
-- name: 'Migration | verify | no migration'
+- name: 'Verify | no migration'
   hosts: 'repo-debian-12-migration-no-keep'
   gather_facts: false
   tasks:
-    - name: 'Migration | verify | query migrated file'
+    - name: 'Verify | query migrated file'
       ansible.builtin.slurp:
         path: '/opt/test_repo_gz/test_repo/config/db/db_skeleton_file.db'
       register: _test_repo_migration
 
-    - name: 'Migration | verify | assert migrated file version'
+    - name: 'Verify | assert migrated file version'
       ansible.builtin.assert:
         quiet: true
         that: _test_repo_migration.content | b64decode == '1.0.1'

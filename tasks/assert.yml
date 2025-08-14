@@ -70,30 +70,41 @@
     repo_host_access_token | length == 0
   ansible.builtin.debug:
     msg: |
-      ⚠ No API token specified (repo_host_access_token).
-
-      Downloads may fail due to rate limited anonymous API usage.
+      ╭───────────────────────────────────────────────────────────────────╮
+      │                                                                   │
+      │         No API token specified (repo_host_access_token).          │
+      │                                                                   │
+      │    Downloads may fail due to rate limited anonymous API usage.    │
+      │                                                                   │
+      ╰───────────────────────────────────────────────────────────────────╯
 
 - name: 'Assert | WARNING ⚠'
   when: repo_release_asset_static_url | length > 0
   ansible.builtin.debug:
     msg: |
-      ⚠ WARNING: DOWNLOAD CANNOT BE VERIFIED.
-
-      Static URLs should ONLY be used for repositories without versioning which
-      release compiled binaries from a separate URL. These downloads can
-      contain malicious code and should be UNTRUSTED by default.
-
-      {{ repo_release_asset_static_url }}
+      ╭───────────────────────────────────────────────────────────────────╮
+      │                                                                   │
+      │               WARNING: DOWNLOAD CANNOT BE VERIFIED.               │
+      │                                                                   │
+      │ Static URLs should ONLY be used for repositories without          │
+      │ versioning which release compiled binaries from a separate URL.   │
+      │ These downloads can contain malicious code and should be          │
+      │ UNTRUSTED by default.                                             │
+      │                                                                   │
+      ╰───────────────────────────────────────────────────────────────────╯
 
 - name: 'Assert | WARNING ⚠'
   when: repo_extract_delete_old_versions
   ansible.builtin.debug:
     msg: |
-      ⚠ Delete old extracted archive versions enabled.
-
-      Existing directories in {{ repo_extract_dir }} will be deleted if they do
-      not match the current specified version. Only directories matching
-      {{ repo_release_repo }} will be considered for deletion.
-
-      DATA DESTRUCTIVE.
+      ╭───────────────────────────────────────────────────────────────────╮
+      │                                                                   │
+      │          Delete old extracted archive versions enabled.           │
+      │                                                                   │
+      │ Existing directories in will be deleted if they do not match the  │
+      │ current specified version. Only directories matching will be      │
+      │ considered for deletion.                                          │
+      │                                                                   │
+      │                         DATA DESTRUCTIVE.                         │
+      │                                                                   │
+      ╰───────────────────────────────────────────────────────────────────╯

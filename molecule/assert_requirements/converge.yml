@@ -1,9 +1,9 @@
 ---
-- name: 'Assert requirements | converge'
+- name: 'Converge'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Assert requirements | converge | required options | owner'
+    - name: 'Converge | required options | owner'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'assertions.yml'
@@ -16,7 +16,7 @@
         test_fail_message:
           'repo_release_owner missing did not trigger assertion.'
 
-    - name: 'Assert requirements | converge | required options | release'
+    - name: 'Converge | required options | release'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'assertions.yml'
@@ -24,12 +24,12 @@
         repo_release_owner: 'test_owner'
         repo_release_asset: 'test_asset'
         repo_release_tag: 'test_tag'
-        test_name: 'required options | release'
+        test_name: 'Converge | required options | release'
         test_role: 'r_pufky.deb.repo'
         test_fail_message:
           'repo_release_repo missing did not trigger assertion.'
 
-    - name: 'Assert requirements | converge | required options | asset'
+    - name: 'Converge | required options | asset'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'assertions.yml'
@@ -37,12 +37,12 @@
         repo_release_owner: 'test_owner'
         repo_release_repo: 'test_repo'
         repo_release_tag: 'test_tag'
-        test_name: 'required options | asset'
+        test_name: 'Converge | required options | asset'
         test_role: 'r_pufky.deb.repo'
         test_fail_message:
           'repo_release_asset missing did not trigger assertion.'
 
-    - name: 'Assert requirements | converge | required options | tag'
+    - name: 'Converge | required options | tag'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'assertions.yml'
@@ -51,24 +51,22 @@
         repo_release_repo: 'test_repo'
         repo_release_asset: 'test_asset'
         repo_release_tag: ''
-        test_name: 'required options | tag'
+        test_name: 'Converge | required options | tag'
         test_role: 'r_pufky.deb.repo'
         test_fail_message:
           'repo_release_tag missing did not trigger assertion.'
 
-    - name: 'Assert requirements | converge | required options | all'
+    - name: 'Converge | required options | all'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'assertions.yml'
       vars:
         repo_release_tag: ''
-        test_name: 'required options | all'
+        test_name: 'Converge | required options | all'
         test_role: 'r_pufky.deb.repo'
         test_fail_message: 'repo_release_* missing did not trigger assertion.'
 
-    - name: >
-        Assert requirements | converge | required options | static URL |
-        no templates
+    - name: 'Converge | required options | static URL | no templates'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'assertions.yml'
@@ -77,14 +75,12 @@
         repo_release_repo: 'test_repo'
         repo_release_asset: 'asset-{VERSION}.tar.gz'
         repo_release_asset_static_url: 'https://example.com'
-        test_name: 'required options | static URL | no templates'
+        test_name: 'Converge | required options | static URL | no templates'
         test_role: 'r_pufky.deb.repo'
         test_fail_message:
           'repo_release_asset template did not trigger assertion.'
 
-    - name: >
-        Assert requirements | converge | required options | static URL |
-        no GPG
+    - name: 'Converge | required options | static URL | no GPG'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'assertions.yml'
@@ -94,13 +90,13 @@
         repo_release_repo: 'test_repo'
         repo_release_signature: 'test_asset_signature.asc'
         repo_release_asset_static_url: 'https://example.com'
-        test_name: 'required options | static URL | no GPG'
+        test_name: 'Converge | required options | static URL | no GPG'
         test_role: 'r_pufky.deb.repo'
         test_fail_message: >
           repo_release_asset_static_url with signature did not trigger
           assertion.
 
-    - name: 'Assert requirements | converge | required options | GPG'
+    - name: 'Converge | required options | GPG'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'assertions.yml'
@@ -109,7 +105,7 @@
         repo_release_asset: 'test_asset'
         repo_release_repo: 'test_repo'
         repo_release_signature: 'test_asset_signature.asc'
-        test_name: 'required options | GPG'
+        test_name: 'Converge | required options | GPG'
         test_role: 'r_pufky.deb.repo'
         test_fail_message:
           'repo_release_signature no key,key ID did not trigger assertion.'

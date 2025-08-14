@@ -1,16 +1,16 @@
 ---
-- name: 'Migration | converge'
+- name: 'Converge'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Migration | converge | apply r_pufky.deb.repo (v1.0.0)'
+    - name: 'Converge | apply r_pufky.deb.repo (v1.0.0)'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
       vars:
         repo_release_asset: 'test_archive_v1.0.0.tar.gz'
         repo_extract_migrate_files: ['config/db/db_skeleton_file.db']
 
-    - name: 'Migration | converge | add non-repo directory'
+    - name: 'Converge | add non-repo directory'
       ansible.builtin.file:
         path: '/opt/test_repo_gz/this_dir_should_not_be_removed'
         owner: 'root'
@@ -18,7 +18,7 @@
         mode: '0755'
         state: 'directory'
 
-    - name: 'Migration | converge | add non-repo directory'
+    - name: 'Converge | add non-repo directory'
       ansible.builtin.file:
         path: '/opt/test_repo_gz/this_file_should_not_be_removed'
         owner: 'root'
@@ -26,11 +26,11 @@
         mode: '0755'
         state: 'touch'
 
-- name: 'Migration | converge | migrate data'
+- name: 'Converge | migrate data'
   hosts: 'repo-debian-12-migration'
   gather_facts: false
   tasks:
-    - name: 'Migration | converge | apply r_pufky.deb.repo (v1.0.1)'
+    - name: 'Converge | apply r_pufky.deb.repo (v1.0.1)'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
       vars:
@@ -41,11 +41,11 @@
           - 'nested_migration'
         repo_extract_delete_old_versions: true
 
-- name: 'Migration | converge | no migration'
+- name: 'Converge | no migration'
   hosts: 'repo-debian-12-migration-no-keep'
   gather_facts: false
   tasks:
-    - name: 'Migration | converge | apply r_pufky.deb.repo (v1.0.1)'
+    - name: 'Converge | apply r_pufky.deb.repo (v1.0.1)'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
       vars:

@@ -1,41 +1,41 @@
 ---
-- name: 'Default | prepare'
+- name: 'Prepare'
   hosts: 127.0.0.1
   connection: local
   gather_facts: false
   tasks:
-    - name: 'Default | prepare | generate cache location'
+    - name: 'Prepare | generate cache location'
       ansible.builtin.set_fact:
         _test_cache:
           '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/cache'
         _test_files:
           '{{ lookup("env", "MOLECULE_PROJECT_DIRECTORY") }}/molecule/files'
 
-    - name: 'Default | prepare | create cache'
+    - name: 'Prepare | create cache'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'create_cache.yml'
       vars:
-        test_name: 'Default | prepare | create cache'
+        test_name: 'Prepare | create cache'
 
-    - name: 'Default | prepare | check testing key'
+    - name: 'Prepare | check testing key'
       ansible.builtin.stat:
         path: '{{ _test_cache }}/466EEC2B67516C7117C85CE3A0BC35D16698BAB9.asc'
       register: _test_prepare
 
-    - name: 'Default | prepare | export testing key file'
+    - name: 'Prepare | export testing key file'
       when: not _test_prepare.stat.exists
       ansible.builtin.get_url:
         url: 'https://keys.openpgp.org/vks/v1/by-fingerprint/466EEC2B67516C7117C85CE3A0BC35D16698BAB9'  # yamllint disable-line rule:line-length
         dest: '{{ _test_cache }}/466EEC2B67516C7117C85CE3A0BC35D16698BAB9.asc'
         mode: '0640'
 
-    - name: 'Default | prepare | check test_archive_v1.0.0.tar.gz.sah256'
+    - name: 'Prepare | check test_archive_v1.0.0.tar.gz.sah256'
       ansible.builtin.stat:
         path: '{{ _test_cache }}/test_archive_v1.0.0.tar.gz'
       register: _test_prepare
 
-    - name: 'Default | prepare | generate test_archive_v1.0.0.tar.gz.sha256'
+    - name: 'Prepare | generate test_archive_v1.0.0.tar.gz.sha256'
       when: not _test_prepare.stat.exists
       ansible.builtin.shell: >
         set -o pipefail &&
@@ -45,12 +45,12 @@
         chdir: '{{ _test_files }}'
       changed_when: true
 
-    - name: 'Default | prepare | check test_archive_v1.0.0.tar.xz.sah256'
+    - name: 'Prepare | check test_archive_v1.0.0.tar.xz.sah256'
       ansible.builtin.stat:
         path: '{{ _test_cache }}/test_archive_v1.0.0.tar.xz'
       register: _test_prepare
 
-    - name: 'Default | prepare | generate test_archive_v1.0.0.tar.xz.sha256'
+    - name: 'Prepare | generate test_archive_v1.0.0.tar.xz.sha256'
       when: not _test_prepare.stat.exists
       ansible.builtin.shell: >
         set -o pipefail &&
@@ -60,12 +60,12 @@
         chdir: '{{ _test_files }}'
       changed_when: true
 
-    - name: 'Default | prepare | check test_archive_v1.0.0.zip.sha256'
+    - name: 'Prepare | check test_archive_v1.0.0.zip.sha256'
       ansible.builtin.stat:
         path: '{{ _test_cache }}/test_archive_v1.0.0.zip'
       register: _test_prepare
 
-    - name: 'Default | prepare | generate test_archive_v1.0.0.zip.sha256'
+    - name: 'Prepare | generate test_archive_v1.0.0.zip.sha256'
       when: not _test_prepare.stat.exists
       ansible.builtin.shell: >
         set -o pipefail &&
@@ -75,7 +75,7 @@
         chdir: '{{ _test_files }}'
       changed_when: true
 
-    - name: 'Default | prepare | create testing binary test_binary_v1.0.0'
+    - name: 'Prepare | create testing binary test_binary_v1.0.0'
       ansible.builtin.copy:
         src: '{{ _test_files }}/test_archive_v1.0.0.zip'
         dest: '{{ _test_cache }}/test_binary_v1.0.0'

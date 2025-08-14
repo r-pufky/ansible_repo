@@ -1,9 +1,35 @@
 ---
-- name: 'Live API test | converge'
+- name: 'Converge'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Live API test | converge | apply r_pufky.deb.repo (github)'
+    - name: 'Prepare | API TESTING NOT ENABLED ⚠'
+      when: >
+        not (repo_live_api_github_enable | default(false)) and
+        not (repo_live_api_codeberg_enable | default(false))
+      ansible.builtin.debug:
+        msg: |
+          ╭───────────────────────────────────────────────────────────────────╮
+          │      TEST WILL NOT EXECUTE UNLESS IT IS EXPLICITLY ENABLED.       │
+          │                                                                   │
+          │ Enable live API commands:                                         │
+          │                                                                   │
+          │   * repo_live_api_github_enable=true                              │
+          │   * repo_live_api_codeberg_enable=true                            │
+          │                                                                   │
+          │ Provide API authentication token:                                 │
+          │                                                                   │
+          │   repo_host_access_token={TOKEN}                                  │
+          │                                                                   │
+          │ Example:                                                          │
+          │                                                                   │
+          │   molecule test -s live_api_test -- -v -e \                       │
+          │     'repo_live_api_github_enable=true, \                          │
+          │      repo_host_access_token={TOKEN}'                              │
+          │                                                                   │
+          ╰───────────────────────────────────────────────────────────────────╯
+
+    - name: 'Converge | apply r_pufky.deb.repo (github)'
       when: (repo_live_api_github_enable | default(false))
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
@@ -18,7 +44,8 @@
           - 'config/config.inc.php.sample'
 
     - name:
-        'Live API test | converge | apply r_pufky.deb.repo (JBIG2enc source)'
+        'Converge | apply r_pufky.deb.repo (JBIG2enc source)'
+      when: (repo_live_api_github_enable | default(false))
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'
       vars:
@@ -32,7 +59,7 @@
         repo_extract_mode: 'a-st,o-rwx'
         repo_extract_extra_opts: '--strip-components=1'
 
-    - name: 'Live API test | converge | apply r_pufky.deb.repo (codeberg)'
+    - name: 'Converge | apply r_pufky.deb.repo (codeberg)'
       when: (repo_live_api_codeberg_enable | default(false))
       ansible.builtin.include_role:
         name: 'r_pufky.deb.repo'

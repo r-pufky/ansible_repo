@@ -1,77 +1,77 @@
 ---
 # yamllint disable rule:line-length
-- name: 'Default | verify | query {{ item.path }}'
+- name: 'Verify | query {{ item.path }}'
   ansible.builtin.stat:
     path: '{{ item.path }}'
   register: _test_repo_dest
 
-- name: 'Default | verify | {{ item.asset }} extracted to {{ item.path }}'  # noqa name[template] extra information required for sane testing
+- name: 'Verify | {{ item.asset }} extracted to {{ item.path }}'  # noqa name[template] extra information required for sane testing
   ansible.builtin.assert:
     quiet: true
     that: _test_repo_dest.stat.exists
     fail_msg: '✘ {{ item.asset }} NOT extracted correctly.'
 
-- name: 'Default | verify | query {{ item.path }}/README.md'  # noqa name[template] extra information required for sane testing
+- name: 'Verify | query {{ item.path }}/README.md'  # noqa name[template] extra information required for sane testing
   ansible.builtin.stat:
     path: '{{ item.path }}/README.md'
   register: _test_repo_file_deleted
 
-- name: 'Default | verify | standard file removed: {{ item.path }}/README.md'  # noqa name[template] extra information required for sane testing
+- name: 'Verify | standard file removed: {{ item.path }}/README.md'  # noqa name[template] extra information required for sane testing
   ansible.builtin.assert:
     quiet: true
     that: not _test_repo_file_deleted.stat.exists
     fail_msg: >
       ✘ {{ item.path }}/README.md exists. It should have been deleted.
 
-- name: 'Default | verify | query {{ item.path }}/.hidden_file'  # noqa name[template] extra information required for sane testing
+- name: 'Verify | query {{ item.path }}/.hidden_file'  # noqa name[template] extra information required for sane testing
   ansible.builtin.stat:
     path: '{{ item.path }}/.hidden_file'
   register: _test_repo_file_hidden_deleted
 
-- name: 'Default | verify | standard file removed: {{ item.path }}/.hidden_file'  # noqa name[template] extra information required for sane testing
+- name: 'Verify | standard file removed: {{ item.path }}/.hidden_file'  # noqa name[template] extra information required for sane testing
   ansible.builtin.assert:
     quiet: true
     that: not _test_repo_file_hidden_deleted.stat.exists
     fail_msg: >
       ✘ {{ item.path }}/.hidden_file exists. It should have been deleted.
 
-- name: 'Default | verify | query {{ item.asset }} extra opts'  # noqa name[template] extra information required for sane testing
+- name: 'Verify | query {{ item.asset }} extra opts'  # noqa name[template] extra information required for sane testing
   ansible.builtin.stat:
     path: '{{ item.path }}/test_archive'
   register: _test_repo_extra_opts
 
-- name: 'Default | verify | {{ item.asset }} extra opts stripped first level'  # noqa name[template] extra information required for sane testing
+- name: 'Verify | {{ item.asset }} extra opts stripped first level'  # noqa name[template] extra information required for sane testing
   when: item.opts and not item.binary
   ansible.builtin.assert:
     quiet: true
     that: not _test_repo_extra_opts.stat.exists
     fail_msg: '✘ top level directory "test_archive" should not exist.'
 
-- name: 'Default | verify | {{ item.asset }} extra opts kept first level'  # noqa name[template] extra information required for sane testing
+- name: 'Verify | {{ item.asset }} extra opts kept first level'  # noqa name[template] extra information required for sane testing
   when: not item.opts and not item.binary
   ansible.builtin.assert:
     quiet: true
     that: _test_repo_extra_opts.stat.exists
     fail_msg: '✘ top level directory "test_archive" deleted. Should be kept.'
 
-- name: 'Default | verify | query {{ item.asset }}'
+- name: 'Verify | query {{ item.asset }}'
   ansible.builtin.stat:
     path: '{{ item.asset }}'
   register: _test_repo_archive_deleted
 
-- name: 'Default | verify | query {{ item.symlink }}'
+- name: 'Verify | query {{ item.symlink }}'
   ansible.builtin.stat:
     path: '{{ item.symlink }}'
   register: _test_repo_symlink
 
-- name: 'Default | verify | symlink not created'
+- name: 'Verify | symlink not created'
   when: item.symlink | length == 0
   ansible.builtin.assert:
     quiet: true
     that: not _test_repo_symlink.stat.exists
     fail_msg: '✘ symlink exists. It should not exist.'
 
-- name: 'Default | verify | symlink created'
+- name: 'Verify | symlink created'
   when: item.symlink | length > 0 and not item.binary
   ansible.builtin.assert:
     quiet: true
@@ -83,10 +83,10 @@
       - _test_repo_symlink.stat.gr_name == 'root'
     fail_msg: '✘ symlink does not exist or is not setup correctly.'
 
-- name: 'Default | verify | symlink binary'
+- name: 'Verify | symlink binary'
   when: item.symlink | length > 0 and item.binary
   block:
-    - name: 'Default | verify | symlink binary | symlink'
+    - name: 'Verify | symlink binary | symlink'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -97,26 +97,26 @@
           - _test_repo_symlink.stat.gr_name == 'root'
         fail_msg: '✘ symlink does not exist or is not setup correctly.'
 
-    - name: 'Default | verify | symlink binary | query binary'
+    - name: 'Verify | symlink binary | query binary'
       ansible.builtin.stat:
         path: '/opt/test_repo_binary/test_repo-v1.0.0/test_binary_v1.0.0'
       register: _test_repo_binary_stat
 
-    - name: 'Default | verify | symlink binary | assert binary'
+    - name: 'Verify | symlink binary | assert binary'
       ansible.builtin.assert:
         quiet: true
         that:
           - _test_repo_binary_stat.stat.mode == '0755'
         fail_msg: '✘ symlink binary should be 0755.'
 
-- name: 'Default | verify | repo_staging_clean'
+- name: 'Verify | repo_staging_clean'
   when: item.clean
   ansible.builtin.assert:
     quiet: true
     that: not _test_repo_archive_deleted.stat.exists
     fail_msg: '✘ {{ item.asset }} exists. It should have been deleted.'
 
-- name: 'Default | verify | repo_staging_clean'
+- name: 'Verify | repo_staging_clean'
   when: not item.clean
   ansible.builtin.assert:
     quiet: true

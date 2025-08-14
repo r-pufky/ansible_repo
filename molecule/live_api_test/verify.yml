@@ -1,12 +1,12 @@
 ---
-- name: 'Live API test | verify | live API extraction successful'
+- name: 'Verify | live API extraction successful'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Live API test | verify | github'
+    - name: 'Verify | github'
       when: (repo_live_api_github_enable | default(false))
       block:
-        - name: 'Live API test | verify | github | find extracted archive'
+        - name: 'Verify | github | find extracted archive'
           ansible.builtin.find:
             paths: '/opt/roundcube'
             file_type: 'directory'
@@ -17,24 +17,25 @@
           register: _test_github_extracted_archives
 
         - name: >
-            Live API test | verify | github |
+            Verify | github |
             archive extracted successfully
           ansible.builtin.assert:
             quiet: true
             that: _test_github_extracted_archives.files | length == 1
             fail_msg: '✘ 0 or multiple repo directories found. Should be 1.'
 
-        - name: 'Live API test | verify | github | {{ item }}'
+        - name: 'Verify | github | {{ item }}'
           ansible.builtin.include_role:
             name: 'r_pufky.lib.tests'
             tasks_from: 'file.yml'
           vars:
-            test_name: 'Live API test | verify | github | {{ item }}'
+            test_name: 'Verify | github | {{ item }}'
             test_file: '{{ item }}'
             test_owner: '{{ omit }}'
             test_group: '{{ omit }}'
             test_mode: '{{ omit }}'
             test_state: 'absent'
+            test_diff: true
           loop:
             - '{{ _test_github_extracted_archives.files[0].path }}/README.md'
             - '{{ _test_github_extracted_archives.files[0].path }}/UPGRADING'
@@ -43,11 +44,11 @@
                   "/config.inc.php.sample"
               }}'
 
-    - name: 'Live API test | verify | JBIG2enc source'
+    - name: 'Verify | JBIG2enc source'
       when: (repo_live_api_github_enable | default(false))
       block:
         - name:
-            'Live API test | verify | JBIG2enc source | find extracted archive'
+            'Verify | JBIG2enc source | find extracted archive'
           ansible.builtin.find:
             paths: '/opt/jbig2enc'
             file_type: 'directory'
@@ -58,17 +59,17 @@
           register: _test_github_source
 
         - name: >
-            Live API test | verify | JBIG2enc source |
+            Verify | JBIG2enc source |
             archive extracted successfully
           ansible.builtin.assert:
             quiet: true
             that: _test_github_source.files | length == 1
             fail_msg: '✘ 0 or multiple repo directories found. Should be 1.'
 
-    - name: 'Live API test | verify | codeberg'
+    - name: 'Verify | codeberg'
       when: (repo_live_api_codeberg_enable | default(false))
       block:
-        - name: 'Live API test | verify | codeberg | find extracted archive'
+        - name: 'Verify | codeberg | find extracted archive'
           ansible.builtin.find:
             paths: '/opt/forgejo'
             file_type: 'directory'
@@ -79,7 +80,7 @@
           register: _test_codeberg_extracted_archives
 
         - name: >
-            Live API test | verify | codeberg |
+            Verify | codeberg |
             archive extracted successfully
           ansible.builtin.assert:
             quiet: true
