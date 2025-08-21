@@ -87,6 +87,12 @@ Run integration tests against live API:
 molecule test -s live_api_test -- -v -e 'repo_live_api_github_enable=true repo_host_access_token={TOKEN}'
 ```
 
+### Releases
+Major release versions track Debian release versions:
+
+* **[13.x.x](https://github.com/r-pufky/ansible_repo)**: 13 Trixie.
+* **[12.x.x](https://github.com/r-pufky/ansible_repo/tree/12.x)**: 12 Bookworm.
+
 ### Testing in other Roles
 Testing may be toggled on the role to facilitate testing other roles which
 consume this role, removing the need to hammer REST API's or download archive
