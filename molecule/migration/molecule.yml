@@ -50,15 +50,15 @@ provisioner:
                 "/molecule/files/test_archive_v1.0.1.tar.gz"
               }}'
 platforms:
-  - name: 'repo-debian-12-migration'
-    image: 'ghcr.io/hifis-net/debian-systemd:12'
+  - name: 'repo-debian-13-migration'
+    image: 'ghcr.io/hifis-net/debian-systemd:13'
     systemd: 'always'
     volumes:
       - '/sys/fs/cgroup:/sys/fs/cgroup:ro'
     command: '/lib/systemd/systemd'
     pre_build_image: true
-  - name: 'repo-debian-12-migration-no-keep'
-    image: 'ghcr.io/hifis-net/debian-systemd:12'
+  - name: 'repo-debian-13-migration-no-keep'
+    image: 'ghcr.io/hifis-net/debian-systemd:13'
     systemd: 'always'
     volumes:
       - '/sys/fs/cgroup:/sys/fs/cgroup:ro'

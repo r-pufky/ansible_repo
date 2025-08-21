@@ -117,8 +117,8 @@ provisioner:
                 "/molecule/files/test_archive_v1.0.0.tar.gz.asc"
               }}'
 platforms:
-  - name: 'repo-debian-12-default'
-    image: 'ghcr.io/hifis-net/debian-systemd:12'
+  - name: 'repo-debian-13-default'
+    image: 'ghcr.io/hifis-net/debian-systemd:13'
     systemd: 'always'
     volumes:
       - '/sys/fs/cgroup:/sys/fs/cgroup:ro'

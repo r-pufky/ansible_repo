@@ -154,8 +154,6 @@
 - name: 'Prep | parse release tags'
   ansible.builtin.set_fact:
     _repo_tag: '{{ _repo_remote_metadata.tag_name }}'
-    _repo_tag_space:
-      '{{ (33 - (_repo_remote_metadata.tag_name | length)) * " " }}'
     __repo_tag_bare: '{{
         _repo_remote_metadata.tag_name
         if repo_release_specifier == "" else
@@ -174,9 +172,10 @@
     msg: |
       ╭───────────────────────────────────────────────────────────────────╮
       │                                                                   │
-      │                 latest version: {{ _repo_tag ~ _repo_tag_space }} │
+      │                     Detected latest version.                      │
       │                                                                   │
-      ╰───────────────────────────────────────────────────────────────────╯
+      ├───────────────────────────────────────────────────────────────────╯
+      │ {{ _repo_tag }}
 
 - name: 'Prep | parse templates'
   ansible.builtin.set_fact:
@@ -215,12 +214,18 @@
     __repo_release_asset not in __repo_asset_dict
   ansible.builtin.fail:
     msg: |
-      ✘ repo_release_asset was not found in returned asset list.
-
-      Did you want to download source with repo_release_download_source_enable?
-
-      repo_release_asset: {{ __repo_release_asset }}
-      assets returned: {{ __repo_asset_dict }}
+      ╭───────────────────────────────────────────────────────────────────╮
+      │                                                                   │
+      │     repo_release_asset was not found in returned asset list.      │
+      │                                                                   │
+      ├───────────────────────────────────────────────────────────────────╯
+      │ Usually this happens when only source is release and no binary
+      │ packages.
+      │
+      │ Download source with repo_release_download_source_enable=true.
+      │
+      │ repo_release_asset: {{ __repo_release_asset }}
+      │ assets returned: {{ __repo_asset_dict }}
 
 - name: 'Prep | parse asset metadata'
   ansible.builtin.set_fact:

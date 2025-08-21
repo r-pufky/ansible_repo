@@ -34,14 +34,17 @@
           - _repo_checksum is mapping
           - _repo_signature is mapping
         fail_msg: |
-          ✘ Exported variables are not set correctly.
-
-          _repo_tag: {{ _repo_tag }}
-          _repo_dir: {{ _repo_dir }}
-          _repo_remote_metadata: {{ _repo_remote_metadata }}
-          _repo_asset: {{ _repo_asset }}
-          _repo_checksum: {{ _repo_checksum }}
-          _repo_signature: {{ _repo_signature }}
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │             Exported variables are not set correctly.             │
+          │                                                                   │
+          ├───────────────────────────────────────────────────────────────────╯
+          │ _repo_tag: {{ _repo_tag }}
+          │ _repo_dir: {{ _repo_dir }}
+          │ _repo_remote_metadata: {{ _repo_remote_metadata }}
+          │ _repo_asset: {{ _repo_asset }}
+          │ _repo_checksum: {{ _repo_checksum }}
+          │ _repo_signature: {{ _repo_signature }}
 
     - name: 'Converge | apply r_pufky.deb.repo (zip)'
       ansible.builtin.include_role:
@@ -65,11 +68,14 @@
           - _repo_checksum is mapping
           - _repo_signature is mapping
         fail_msg: |
-          ✘ Exported variables are not set correctly.
-
-          _repo_tag: {{ _repo_tag }}
-          _repo_dir: {{ _repo_dir }}
-          _repo_remote_metadata: {{ _repo_remote_metadata }}
-          _repo_asset: {{ _repo_asset }}
-          _repo_checksum: {{ _repo_checksum }}
-          _repo_signature: {{ _repo_signature }}
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │             Exported variables are not set correctly.             │
+          │                                                                   │
+          ├───────────────────────────────────────────────────────────────────╯
+          │ _repo_tag: {{ _repo_tag }}
+          │ _repo_dir: {{ _repo_dir }}
+          │ _repo_remote_metadata: {{ _repo_remote_metadata }}
+          │ _repo_asset: {{ _repo_asset }}
+          │ _repo_checksum: {{ _repo_checksum }}
+          │ _repo_signature: {{ _repo_signature }}

@@ -10,24 +10,24 @@
       ansible.builtin.debug:
         msg: |
           ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
           │      TEST WILL NOT EXECUTE UNLESS IT IS EXPLICITLY ENABLED.       │
           │                                                                   │
-          │ Enable live API commands:                                         │
-          │                                                                   │
-          │   * repo_live_api_github_enable=true                              │
-          │   * repo_live_api_codeberg_enable=true                            │
-          │                                                                   │
-          │ Provide API authentication token:                                 │
-          │                                                                   │
-          │   repo_host_access_token={TOKEN}                                  │
-          │                                                                   │
-          │ Example:                                                          │
-          │                                                                   │
-          │   molecule test -s live_api_test -- -v -e \                       │
-          │     'repo_live_api_github_enable=true, \                          │
-          │      repo_host_access_token={TOKEN}'                              │
-          │                                                                   │
-          ╰───────────────────────────────────────────────────────────────────╯
+          ├───────────────────────────────────────────────────────────────────╯
+          │ Enable live API commands:
+          │
+          │   * repo_live_api_github_enable=true
+          │   * repo_live_api_codeberg_enable=true
+          │
+          │ Provide API authentication token:
+          │
+          │   repo_host_access_token={TOKEN}
+          │
+          │ Example:
+          │
+          │   molecule test -s live_api_test -- -v -e \
+          │     'repo_live_api_github_enable=true, \
+          │      repo_host_access_token={TOKEN}'
 
     - name: 'Converge | apply r_pufky.deb.repo (github)'
       when: (repo_live_api_github_enable | default(false))

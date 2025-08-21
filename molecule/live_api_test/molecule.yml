@@ -41,7 +41,7 @@ provisioner:
         repo_live_api_enable: false
 platforms:
   - name: 'repo-12-live_api_test'
-    image: 'ghcr.io/hifis-net/debian-systemd:12'
+    image: 'ghcr.io/hifis-net/debian-systemd:13'
     systemd: 'always'
     volumes:
       - '/sys/fs/cgroup:/sys/fs/cgroup:ro'

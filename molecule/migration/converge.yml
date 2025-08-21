@@ -27,7 +27,7 @@
         state: 'touch'
 
 - name: 'Converge | migrate data'
-  hosts: 'repo-debian-12-migration'
+  hosts: 'repo-debian-13-migration'
   gather_facts: false
   tasks:
     - name: 'Converge | apply r_pufky.deb.repo (v1.0.1)'
@@ -42,7 +42,7 @@
         repo_extract_delete_old_versions: true
 
 - name: 'Converge | no migration'
-  hosts: 'repo-debian-12-migration-no-keep'
+  hosts: 'repo-debian-13-migration-no-keep'
   gather_facts: false
   tasks:
     - name: 'Converge | apply r_pufky.deb.repo (v1.0.1)'
