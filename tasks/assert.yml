@@ -114,7 +114,7 @@
       │          Delete old extracted archive versions enabled.           │
       │                                                                   │
       ├───────────────────────────────────────────────────────────────────╯
-      │ Only directories matching archive verisoned name will considered
-      │ for deletion.
+      │ Only directories matching archive version name are considered for
+      │ deletion.
       │
       │ DATA DESTRUCTIVE.
