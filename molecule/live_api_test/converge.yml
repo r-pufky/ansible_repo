@@ -57,7 +57,7 @@
         repo_extract_dir: '/opt/jbig2enc'
         repo_extract_symlink: '/opt/jbig2enc/jbig2enc'
         repo_extract_mode: 'a-st,o-rwx'
-        repo_extract_extra_opts: '--strip-components=1'
+        repo_extract_extra_opts: ['--strip-components=1']
 
     - name: 'Converge | apply r_pufky.deb.repo (codeberg)'
       when: (repo_live_api_codeberg_enable | default(false))

@@ -169,7 +169,7 @@
         repo_staging_clean: false
         repo_extract_dir: '/opt/test_repo_zip'
         repo_extract_symlink: '/opt/test_repo_zip/test_repo'
-        repo_extract_extra_opts: ''
+        repo_extract_extra_opts: []
         repo_extract_remove_files:
           - 'README.md'
           - '.hidden_file'

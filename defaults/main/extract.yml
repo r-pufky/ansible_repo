@@ -35,8 +35,10 @@ repo_extract_dir: '/tmp'
 # Most archives extract archive name as base directory; stripping the first
 # component will extract directly into destination.
 #
-# Default: '--strip-components=1'.
-repo_extract_extra_opts: '--strip-components=1'
+# Default:
+#   - '--strip-components=1'
+repo_extract_extra_opts:
+  - '--strip-components=1'
 
 # Apply permissions to extracted files and created directories.
 #

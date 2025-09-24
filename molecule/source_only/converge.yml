@@ -52,7 +52,7 @@
       vars:
         repo_release_asset: 'test_archive_v1.0.0.zip'
         repo_extract_dir: '/opt/test_repo_zip'
-        repo_extract_extra_opts: ''
+        repo_extract_extra_opts: []
         repo_extract_remove_files:
           - 'README.md'
           - '.hidden_file'

@@ -45,7 +45,8 @@ roles/my_custom_role/tasks/task.yml
     repo_file_group: 'overseerr'
     repo_extract_dest: '/opt/overseerr'
     repo_extract_mode: 'a-st,o-rwx'
-    repo_extract_extra_opts: '--strip-components=1'
+    repo_extract_extra_opts:
+      - '--strip-components=1'
     repo_extract_symlink: '/opt/overseerr/latest'
     repo_extract_migrate_files: ['config.db']
     repo_extract_remove_files:
