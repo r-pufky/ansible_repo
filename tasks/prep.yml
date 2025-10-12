@@ -166,7 +166,7 @@
              zip(_repo_remote_metadata.assets))
       }}'
 
-- name: 'Prep | latest → {{ _repo_tag }}'
+- name: 'Prep | latest ➔ {{ _repo_tag }}'
   when: repo_release_tag == 'latest'
   ansible.builtin.debug:
     msg: |
