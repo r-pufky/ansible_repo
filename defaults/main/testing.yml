@@ -12,7 +12,8 @@
 # versions as well as a locally sourced asset in place of downloading the file
 # from the repo endpoint.
 #
-# molecule test -s live_api_test -- -v -e 'repo_testing_enable=true,repo_host_access_token={TOKEN}'
+# molecule test -s live_api_test -- -v \
+#   -e '{"repo_testing_enable": true, "repo_host_access_token": "{TOKEN}"}'
 #
 # Default: False.
 repo_testing_enable: false

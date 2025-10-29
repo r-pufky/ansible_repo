@@ -84,8 +84,9 @@ molecule test --all
 ```
 
 Run integration tests against live API:
-```
-molecule test -s live_api_test -- -v -e 'repo_live_api_github_enable=true repo_host_access_token={TOKEN}'
+``` bash
+molecule test -s live_api_test -- -v \
+  -e '{"repo_live_api_github_enable":true, "repo_host_access_token": "{TOKEN}"}'
 ```
 
 ### Releases
